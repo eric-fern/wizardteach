@@ -12,7 +12,13 @@ export default defineConfig({
     },
     build: {
         outDir: '../dist',
-        emptyOutDir: true
+        emptyOutDir: true,
+        rollupOptions: {
+            external: [],
+            output: {
+                manualChunks: undefined
+            }
+        }
     },
     resolve: {
         alias: {
