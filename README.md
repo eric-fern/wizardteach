@@ -2,17 +2,26 @@
 
 AI-powered teaching material generator that creates comprehensive, week-by-week lesson plans through simple teacher inputs.
 
+## Product Tiers
+- **Free:** Basic planning, limited generation, standards tracking
+- **Premium ($9.99/mo | $89/yr):** Unlimited generation, custom templates, advanced materials
+
 ## System Architecture
 
 ### Overall System
 ```mermaid
 graph LR
-    UI[Vue Frontend] -->|Auth + Requests| CF[Cloudflare]
-    CF -->|Validated| AF[Azure Functions]
+    UI[Vue Frontend] -->|Request| CF[Cloudflare]
+    subgraph Cloudflare
+        CFW[Workers API Gateway]
+    end
+    CF -->|Auth + Route| CFW
+    CFW -->|Validated| AF[Azure Functions]
     AF -->|Generation| SK[Semantic Kernel]
     AF -->|Storage| DB[CosmosDB]
     SK -->|Response| AF
-    AF -->|Response| UI
+    AF -->|Response| CFW
+    CFW -->|Response| UI
 ```
 
 ### Frontend Architecture
@@ -28,29 +37,27 @@ graph TD
 ### Backend Architecture
 ```mermaid
 graph LR
-    CF[Cloudflare] -->|Auth| APIM[API Gateway]
-    APIM -->|Request| AF[Azure Functions]
+    subgraph Cloudflare
+        CFW[Workers API Gateway]
+        CFW -->|Auth + Validate| CFW
+    end
+    CFW -->|Authenticated| AF[Azure Functions]
     AF -->|Generate| SK[Semantic Kernel]
     AF -->|Store| DB[CosmosDB]
     SK -->|Content| AF
     DB -->|Data| AF
+    AF -->|Response| CFW
 ```
 
-## Current Implementation (Phase 1)
+## Implementation Phases
 
-### Core Features
-- Teacher input collection
-- Basic material generation
-- Email signup flow
-- Module preview system
+### Current (Phase 1)
+- Teacher input wizard
+- Basic generation
+- Email collection
+- Module preview
+- Core data models
 
-### Technical Stack
-- Vue 3 + Composition API
-- Azure Functions
-- Semantic Kernel
-- CosmosDB
-
-### Data Models
 ```typescript
 interface GenerationRequest {
   subject: string;
@@ -71,15 +78,12 @@ interface Module {
 }
 ```
 
-## Near-Term Development (Phase 2)
-
-### Features
-- Material system implementation
-- User authentication
+### Near-Term (Phase 2)
+- Material system
+- User accounts
 - Premium features
 - Enhanced UI/UX
 
-### State Management
 ```typescript
 interface AppState {
   setup: {
@@ -98,9 +102,12 @@ interface AppState {
 }
 ```
 
-## Future Extensions (Phase 3)
+### Future (Phase 3)
+- Real-time sync
+- Offline support
+- Collaboration
+- Mobile apps
 
-### Real-time Features
 ```typescript
 interface SyncState {
   userId: string;
@@ -110,23 +117,24 @@ interface SyncState {
 }
 ```
 
-### WebSocket Integration
-- Cloudflare WebSocket
-- Azure Functions backend
-- CosmosDB change feed
-- Real-time updates
+## Technical Stack
+- Vue 3 + Composition API
+- Cloudflare Workers
+- Azure Functions
+- Semantic Kernel
+- CosmosDB
+
+## Security & Performance
+- Edge authentication & rate limiting
+- DDoS protection
+- Generation speed optimization
+- Real-time validation (future)
+- Collaboration security (future)
 
 ## Success Metrics
-
-### User Acquisition
-- Signup conversion
-- Email collection
-- Premium upgrades
-
-### Technical Performance
-- Generation speed
-- System uptime
-- Error rates
+- Conversion: Signup rate, premium upgrades
+- Usage: Generation volume, material access
+- Technical: Response times, uptime, error rates
 
 ## Development Process
 
@@ -145,9 +153,9 @@ interface SyncState {
 ## Security
 
 ### Current
-- Cloudflare edge authentication
-- Azure Functions authorization
-- Rate limiting
+- Cloudflare Workers API Gateway
+- Edge authentication & authorization
+- Rate limiting at edge
 - DDoS protection
 
 ### Future
