@@ -3,7 +3,7 @@
     <div class="max-w-md w-full">
       <div class="text-center mb-8">
         <h1 class="text-4xl font-bold text-gray-900 mb-4">
-          Generate Your Curriculum
+          Generate Lesson Plans and Teaching Materials with AI
         </h1>
         <p class="text-lg text-gray-600">
           Create professional teaching materials in minutes
@@ -13,7 +13,7 @@
       <div class="bg-white rounded-lg shadow-sm p-6">
         <div class="mb-6">
           <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">
-            What would you like to teach?
+            What subject would you like to teach?
           </label>
           <input
             id="subject"

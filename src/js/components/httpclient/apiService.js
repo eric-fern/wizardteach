@@ -3,7 +3,7 @@ import axios from 'axios';
 // Create Axios instance with default config
 const api = axios.create({
   // Update baseURL to your Cloudflare Workers URL or API Gateway URL
-  baseURL: process.env.VITE_API_URL || 'https://api.wizardteach.com',
+  baseURL: import.meta.env.VITE_API_URL || 'https://api.wizardteach.com',
   headers: {
     'Content-Type': 'application/json',
     // Add any default headers needed for Cloudflare

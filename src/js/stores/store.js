@@ -114,14 +114,14 @@ export const useStore = defineStore('store', {
     },
     
     durations: {
+      '15': '15 minutes',
       '30': '30 minutes',
       '45': '45 minutes',
       '60': '1 hour',
-      '90': '1.5 hours',
-      '120': '2 hours',
-      '180': '3 hours',
-      '360': 'Half day',
-      '480': 'Full day'
+      '75': '1 hour 15 minutes',
+      '90': '1 hour 30 minutes',
+      '105': '1 hour 45 minutes',
+      '120': '2 hours'
     }
   }),
 

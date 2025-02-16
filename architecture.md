@@ -134,3 +134,112 @@ graph LR
 - Enhanced error handling
 - Request/response validation
 - API versioning strategy
+
+# WizardTeach Architecture
+
+## System Overview
+- Vue 3 frontend with AI-powered teaching material generation
+- Azure Functions backend with Semantic Kernel for AI
+- Cloudflare for edge security and WebSocket (future)
+- CosmosDB for data persistence
+
+## Current Architecture
+```mermaid
+graph LR
+    UI[Vue Client] -->|HTTP + Auth| CF[Cloudflare]
+    CF -->|Validated Request| AF[Azure Functions]
+    AF -->|AI Generation| SK[Semantic Kernel]
+    AF -->|Storage| DB[CosmosDB]
+```
+
+## Components
+
+### Frontend
+- Vue 3 + Composition API
+- Pinia state management
+- Tailwind CSS + Element Plus
+```
+src/
+├── js/
+│   ├── components/
+│   │   ├── shared/       # Common components
+│   │   ├── wizard/      # Setup wizard
+│   │   └── modules/     # Content modules
+│   ├── stores/         # Pinia stores
+│   └── router/         # Vue routing
+```
+
+### Backend
+- Azure Functions (serverless)
+- Semantic Kernel for AI
+- CosmosDB for storage
+- Cloudflare for edge
+
+## Data Models
+
+### Core Types
+```typescript
+interface Module {
+  id: string;
+  weekNumber: number;
+  title: string;
+  description: string;
+  tags: string[];
+  materials: DailyMaterials;
+}
+
+interface Material {
+  id: string;
+  title: string;
+  type: MaterialType;
+  link: string;
+  isPremium: boolean;
+}
+
+interface GenerationRequest {
+  subject: string;
+  studentAge: string;
+  classSize: number;
+  duration: number;
+  schedule: Schedule;
+  preferences: TeachingPreferences;
+}
+```
+
+## State Management
+
+### Stores
+1. Setup Store: Wizard state, validation
+2. Module Store: Content organization
+3. User Store: Authentication, preferences
+
+## Security
+- Cloudflare edge authentication
+- Azure Functions authorization
+- Rate limiting and DDoS protection
+- Secure WebSocket (future)
+
+## Future Extensions
+
+### Real-time Sync
+```typescript
+interface SyncState {
+  userId: string;
+  timestamp: number;
+  status: 'synced' | 'pending';
+  changes: Change[];
+}
+```
+
+### WebSocket Integration
+- Direct through Cloudflare
+- Azure Functions backend
+- CosmosDB change feed
+- Optimistic updates
+
+## Implementation Priorities
+1. Core generation flow
+2. Email collection
+3. Module organization
+4. Premium features
+5. Real-time sync (future)
