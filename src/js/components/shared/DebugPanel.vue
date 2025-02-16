@@ -177,12 +177,12 @@
             <h5 class="text-xs font-semibold text-gray-700 border-b pb-1">HTTP Request Testing</h5>
             <div class="flex items-center space-x-4">
               <button
-                @click="handleDebugGenerate"
+                @click="handleTestRequest"
                 :disabled="isGenerating"
-                class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors duration-300 flex items-center space-x-2 text-xs"
+                class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-300 flex items-center space-x-2 text-xs"
               >
-                <span>Send Placeholder HTTP</span>
-                <svg v-if="debugSuccess" class="w-4 h-4 text-white animate-scale-in" fill="currentColor" viewBox="0 0 20 20">
+                <span>Test API</span>
+                <svg v-if="requestSuccess" class="w-4 h-4 text-white animate-scale-in" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                 </svg>
               </button>
@@ -193,6 +193,10 @@
             <div v-if="lastRequestData" class="mt-2">
               <div class="text-xs text-gray-500 mb-1">Last request data:</div>
               <pre class="text-xs p-2 bg-gray-200 rounded overflow-auto max-h-32">{{ lastRequestData }}</pre>
+            </div>
+            <div v-if="lastResponse" class="mt-2">
+              <div class="text-xs text-gray-500 mb-1">Last response:</div>
+              <pre class="text-xs p-2 bg-gray-200 rounded overflow-auto max-h-32">{{ lastResponse }}</pre>
             </div>
           </div>
         </div>
@@ -209,9 +213,10 @@ import { apiService } from '@/components/httpclient/apiService';
 const store = useStore();
 const isDebugVisible = ref(false);
 const isGenerating = ref(false);
-const debugSuccess = ref(false);
+const requestSuccess = ref(false);
 const debugError = ref(null);
 const lastRequestData = ref(null);
+const lastResponse = ref(null);
 
 const toggleDebug = () => {
   // Save debug visibility state to localStorage
@@ -247,59 +252,32 @@ const formatFocusArea = (key) => {
   return labels[key] || key;
 };
 
-const handleDebugGenerate = async () => {
+const handleTestRequest = async () => {
   if (isGenerating.value) return;
   
   isGenerating.value = true;
   debugError.value = null;
-  debugSuccess.value = false;
+  lastResponse.value = null;
   
   try {
-    // Use the same data structure as our store
+    // Create test data using current form state
     const data = {
-      correlationId: `debug-${Date.now()}`,
-      requestType: 'generate',
-      parameters: {
-        // Basic Info
-        subject: store.formData.subject || 'math',
-        studentAgeRange: store.formData.studentAgeRange || '12-13',
-        numberOfStudents: store.formData.numberOfStudents || 25,
-        
-        // Schedule
-        startDate: store.formData.startDate || '2024-01-01',
-        endDate: store.formData.endDate || '2024-06-30',
-        classDuration: store.formData.classDuration || '45',
-        funFridays: store.formData.funFridays || false,
-        hasAlternatingSchedule: store.formData.hasAlternatingSchedule,
-        classDays: store.formData.classDays,
-        classDaysA: store.formData.classDaysA,
-        classDaysB: store.formData.classDaysB,
-        holidays: store.formData.holidays,
-        
-        // Student Composition
-        studentComposition: store.formData.studentComposition,
-        
-        // Focus Areas
-        focusAreas: store.formData.focusAreas,
-        
-        // Standards
-        standards: store.formData.standards,
-        
-        // Test Prep
-        testPrep: store.formData.testPrep
-      }
+      subject: store.formData.subject || 'math',
+      studentAgeRange: store.formData.studentAgeRange || '12-13',
+      numberOfStudents: store.formData.numberOfStudents || 25,
     };
     
     lastRequestData.value = JSON.stringify(data, null, 2);
-    await apiService.generate(data);
+    const response = await apiService.testRequest(data);
+    lastResponse.value = JSON.stringify(response.data, null, 2);
     
-    debugSuccess.value = true;
+    requestSuccess.value = true;
     setTimeout(() => {
-      debugSuccess.value = false;
+      requestSuccess.value = false;
     }, 3000);
   } catch (err) {
     debugError.value = err.message;
-    console.error('Debug generation failed:', err);
+    console.error('API test failed:', err);
   } finally {
     isGenerating.value = false;
   }
