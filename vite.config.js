@@ -4,15 +4,15 @@ import path from 'path';
 
 export default defineConfig({
     plugins: [vue()],
-    root: '.',
+    root: 'src',
     base: '/',
-    publicDir: 'public',
+    publicDir: '../public',
     server: {
         port: 3000,
         open: true
     },
     build: {
-        outDir: 'dist',
+        outDir: '../dist',
         emptyOutDir: true,
         target: 'esnext',
         minify: 'esbuild'

@@ -18,36 +18,7 @@ export const useStore = defineStore('store', {
       // Schedule
       startDate: '',
       endDate: '',
-      classDuration: '',
-      funFridays: false,
-      hasAlternatingSchedule: false,
-      classDays: {
-        Mon: false,
-        Tue: false,
-        Wed: false,
-        Thu: false,
-        Fri: false,
-        Sat: false,
-        Sun: false
-      },
-      classDaysA: {
-        Mon: false,
-        Tue: false,
-        Wed: false,
-        Thu: false,
-        Fri: false,
-        Sat: false,
-        Sun: false
-      },
-      classDaysB: {
-        Mon: false,
-        Tue: false,
-        Wed: false,
-        Thu: false,
-        Fri: false,
-        Sat: false,
-        Sun: false
-      },
+      lessonDuration: '',
       holidays: [], // Each holiday will be { title: string, startDate: string, endDate: string }
       
       // Student Composition
@@ -121,7 +92,8 @@ export const useStore = defineStore('store', {
       '75': '1 hour 15 minutes',
       '90': '1 hour 30 minutes',
       '105': '1 hour 45 minutes',
-      '120': '2 hours'
+      '120': '2 hours',
+      '240': '4 hours'
     }
   }),
 
@@ -135,12 +107,12 @@ export const useStore = defineStore('store', {
            state.formData.numberOfStudents &&
            state.formData.startDate && 
            state.formData.endDate && 
-           state.formData.classDuration) : true,
+           state.formData.lessonDuration) : true,
       studentAgeRange: state.formData.studentAgeRange,
       numberOfStudents: state.formData.numberOfStudents,
       startDate: state.formData.startDate,
       endDate: state.formData.endDate,
-      classDuration: state.formData.classDuration,
+      lessonDuration: state.formData.lessonDuration,
       holidaysCount: state.formData.holidays.length
     }),
 
@@ -150,21 +122,12 @@ export const useStore = defineStore('store', {
 
       switch (state.currentStep) {
         case 0: // Course Details
-          // Check if at least one class day is selected
-          const hasRegularClassDays = !state.formData.hasAlternatingSchedule && 
-            Object.values(state.formData.classDays).some(day => day);
-          
-          const hasAlternatingClassDays = state.formData.hasAlternatingSchedule && 
-            Object.values(state.formData.classDaysA).some(day => day) &&
-            Object.values(state.formData.classDaysB).some(day => day);
-
           return !!(
             state.formData.studentAgeRange &&
             state.formData.numberOfStudents &&
             state.formData.startDate &&
             state.formData.endDate &&
-            state.formData.classDuration &&
-            (hasRegularClassDays || hasAlternatingClassDays)
+            state.formData.lessonDuration
           );
 
         case 1: // Standards
@@ -312,56 +275,13 @@ export const useStore = defineStore('store', {
     },
 
     updateFormData(field, value) {
-      if (field === 'hasAlternatingSchedule') {
-        // First update the flag
-        this.formData.hasAlternatingSchedule = value;
-        
-        // Clear all schedules when toggling
-        const clearDays = {
-          Mon: false,
-          Tue: false,
-          Wed: false,
-          Thu: false,
-          Fri: false,
-          Sat: false,
-          Sun: false
-        };
-
-        if (value) {
-          // Switching TO alternating schedule
-          // Clear regular schedule only
-          this.formData.classDays = { ...clearDays };
-        } else {
-          // Switching FROM alternating schedule
-          // Clear A/B schedules only
-          this.formData.classDaysA = { ...clearDays };
-          this.formData.classDaysB = { ...clearDays };
-        }
-      } else if (field === 'classDays' && this.formData.hasAlternatingSchedule) {
-        // Prevent updates to regular schedule when in alternating mode
-        return;
-      } else if ((field === 'classDaysA' || field === 'classDaysB') && !this.formData.hasAlternatingSchedule) {
-        // Prevent updates to alternating schedules when in regular mode
-        return;
-      } else {
-        this.formData[field] = value;
-      }
+      this.formData[field] = value;
     },
 
     // This will be used when we're ready to send to the backend
     prepareCurriculumData() {
       const data = { ...this.formData };
       
-      // Only include relevant schedule data
-      if (data.hasAlternatingSchedule) {
-        // Remove regular schedule data if using alternating
-        delete data.classDays;
-      } else {
-        // Remove alternating schedule data if using regular
-        delete data.classDaysA;
-        delete data.classDaysB;
-      }
-
       return {
         ...data,
         selectedFocusAreas: this.getSelectedFocusAreas,
@@ -392,36 +312,7 @@ export const useStore = defineStore('store', {
         numberOfStudents: '',
         startDate: '',
         endDate: '',
-        classDuration: '',
-        funFridays: false,
-        hasAlternatingSchedule: false,
-        classDays: {
-          Mon: false,
-          Tue: false,
-          Wed: false,
-          Thu: false,
-          Fri: false,
-          Sat: false,
-          Sun: false
-        },
-        classDaysA: {
-          Mon: false,
-          Tue: false,
-          Wed: false,
-          Thu: false,
-          Fri: false,
-          Sat: false,
-          Sun: false
-        },
-        classDaysB: {
-          Mon: false,
-          Tue: false,
-          Wed: false,
-          Thu: false,
-          Fri: false,
-          Sat: false,
-          Sun: false
-        },
+        lessonDuration: '',
         holidays: [],
         studentComposition: {
           esl: false,

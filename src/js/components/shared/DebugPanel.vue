@@ -208,7 +208,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useStore } from '@/stores/store';
-import { apiService } from '@/components/httpclient/apiService';
+import { apiService } from '@/api/apiService';
+import { createEmptyRequest } from '@/models/Request';
 
 const store = useStore();
 const isDebugVisible = ref(false);
@@ -262,12 +263,23 @@ const handleTestRequest = async () => {
   try {
     // Create test data using current form state
     const data = {
-      subject: store.formData.subject || 'math',
-      studentAgeRange: store.formData.studentAgeRange || '12-13',
-      numberOfStudents: store.formData.numberOfStudents || 25,
+      // Basic Information
+      subject: store.formData.subject,
+      studentAgeRange: store.formData.studentAgeRange,
+      numberOfStudents: store.formData.numberOfStudents,
+      
+      // Schedule Information
+      startDate: store.formData.startDate,
+      endDate: store.formData.endDate,
+      lessonDuration: store.formData.lessonDuration,
+      
+      // Holidays and Breaks
+      holidays: store.formData.holidays || []
     };
     
-    lastRequestData.value = JSON.stringify(data, null, 2);
+    const payload = createEmptyRequest();
+    Object.assign(payload, data);
+    lastRequestData.value = JSON.stringify(payload, null, 2);
     const response = await apiService.testRequest(data);
     lastResponse.value = JSON.stringify(response.data, null, 2);
     
@@ -282,6 +294,23 @@ const handleTestRequest = async () => {
     isGenerating.value = false;
   }
 };
+
+const debugInfo = (state) => ({
+  currentStep: state.currentStep,
+  hasAttemptedNext: state.hasAttemptedNext,
+  canProceed: state.currentStep === 0 ? 
+    !!(state.formData.studentAgeRange && 
+       state.formData.numberOfStudents &&
+       state.formData.startDate && 
+       state.formData.endDate && 
+       state.formData.classDuration) : true,
+  studentAgeRange: state.formData.studentAgeRange,
+  numberOfStudents: state.formData.numberOfStudents,
+  startDate: formatDate(state.formData.startDate),
+  endDate: formatDate(state.formData.endDate),
+  classDuration: state.formData.classDuration + ' minutes',
+  holidays: state.formData.holidays.length + ' holidays'
+});
 </script>
 
 <style scoped>

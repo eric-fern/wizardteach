@@ -57,10 +57,7 @@
           <!-- Course Duration Tags -->
           <template v-if="formData.startDate && formData.endDate">
             <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
-              <span>From: {{ formatDate(formData.startDate) }}</span>
-            </div>
-            <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
-              <span>To: {{ formatDate(formData.endDate) }}</span>
+              <span>{{ formatDate(formData.startDate) }} to {{ formatDate(formData.endDate) }}</span>
             </div>
             <div v-if="formData.funFridays" 
               class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-700"
@@ -70,9 +67,9 @@
           </template>
 
           <!-- Class Schedule Tags -->
-          <template v-if="formData.classDuration">
+          <template v-if="formData.lessonDuration">
             <div class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-700">
-              <span>{{ formatDuration(formData.classDuration) }} per class</span>
+              <span>{{ formatDuration(formData.lessonDuration) }} per class</span>
             </div>
           </template>
 
@@ -156,347 +153,10 @@
 
       <!-- Step Content -->
       <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-        <!-- Step 1: Grade Level and Semester Length -->
-        <div v-if="currentStep === 0">
-          <div class="space-y-6">
-            <!-- Students -->
-            <div>
-              <h2 class="text-xl font-bold text-gray-900 mb-4">Students</h2>
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Age Range</label>
-              <select 
-                    v-model="formData.studentAgeRange"
-                    class="w-full p-3 border rounded-lg focus:ring-2 border-gray-300"
-              >
-                <option value="">Select an age range</option>
-                <option v-for="age in ageOptions" :key="age.value" :value="age.value">
-                  {{ age.label }}
-                </option>
-              </select>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1">Number of Students</label>
-                  <input 
-                    type="number" 
-                    v-model="formData.numberOfStudents"
-                    min="1"
-                    max="100"
-                    class="w-full p-3 border rounded-lg focus:ring-2 border-gray-300"
-                    placeholder="Enter class size"
-                  >
-                </div>
-              </div>
-            </div>
-
-            <!-- Dates of Instruction -->
-            <div>
-              <h2 class="text-xl font-bold text-gray-900 mb-4">Dates of Instruction</h2>
-              <div class="space-y-4">
-                <!-- Date Inputs and Checkboxes in a grid -->
-                <div class="grid grid-cols-7 gap-4">
-                  <div class="col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-                    <input 
-                      type="date" 
-                      v-model="formData.startDate"
-                      class="w-44 p-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 border-gray-300"
-                    />
-                  </div>
-                  <div class="col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-                    <input 
-                      type="date" 
-                      v-model="formData.endDate"
-                      class="w-44 p-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 border-gray-300"
-                    />
-                  </div>
-                  <div class="col-span-3 flex items-end">
-                    <label class="inline-flex items-center group relative">
-                      <input 
-                        type="checkbox" 
-                        v-model="formData.funFridays"
-                        class="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
-                      >
-                      <span class="ml-2 text-sm text-gray-700">Fun Friday Lessons</span>
-                      <button class="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </button>
-                      <div class="invisible group-hover:visible absolute bottom-full left-0 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg">
-                        Lessons on Friday will be a tad easier and more fun (within reason)
-                      </div>
-                    </label>
-                  </div>
-                </div>
-
-                <!-- Holiday Management and Focus Areas -->
-                <div class="grid grid-cols-7 gap-4 mt-4">
-                  <div class="col-span-4">
-                    <div class="bg-gray-50 p-3 rounded-lg h-full">
-                      <div class="flex justify-between items-center mb-3">
-                        <div class="flex items-center group relative">
-                          <h3 class="text-sm font-medium text-gray-900">Holidays & Breaks</h3>
-                          <button class="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                          </button>
-                          <div class="invisible group-hover:visible absolute bottom-full left-0 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg">
-                            End of lessons before holidays will include holiday-specific language (e.g., "Merry Christmas!", "Happy Thanksgiving!")
-                          </div>
-                        </div>
-                        <button 
-                          @click="isAddingHoliday = true"
-                          class="w-6 h-6 flex items-center justify-center rounded-full bg-blue-500 text-white hover:bg-blue-600"
-                        >
-                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                          </svg>
-                        </button>
-                      </div>
-
-                      <!-- Add Holiday Form -->
-                      <div v-if="isAddingHoliday" class="mb-3 p-3 bg-white rounded-lg border border-gray-200">
-                        <div class="space-y-2">
-                          <input
-                            v-model="newHoliday.title"
-                            type="text"
-                            placeholder="Holiday Name"
-                            class="w-full p-1.5 text-sm border border-gray-300 rounded-lg"
-                          />
-                          <div class="grid grid-cols-2 gap-2">
-                            <div>
-                              <input
-                                v-model="newHoliday.startDate"
-                                type="date"
-                                class="w-full p-1.5 text-sm border border-gray-300 rounded-lg"
-                              />
-                            </div>
-                            <div>
-                              <input
-                                v-model="newHoliday.endDate"
-                                type="date"
-                                class="w-full p-1.5 text-sm border border-gray-300 rounded-lg"
-                              />
-                            </div>
-                          </div>
-                          <div class="flex justify-end gap-2">
-                            <button 
-                              @click="isAddingHoliday = false"
-                              class="px-2 py-1 text-sm text-gray-600 hover:text-gray-800"
-                            >
-                              Cancel
-                            </button>
-                            <button 
-                              @click="addHoliday"
-                              class="px-2 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
-                              :disabled="!canAddHoliday"
-                            >
-                              Add
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-
-                      <!-- Holiday List with max height and scrolling -->
-                      <div class="space-y-2 max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
-                        <div 
-                          v-for="(holiday, index) in formData.holidays" 
-                          :key="index"
-                          class="flex items-center justify-between p-2 bg-white rounded-lg border border-gray-200"
-                        >
-                          <div>
-                            <div class="font-medium text-sm text-gray-900">{{ holiday.title }}</div>
-                            <div class="text-xs text-gray-500">
-                              {{ formatDate(holiday.startDate) }} - {{ formatDate(holiday.endDate) }}
-                            </div>
-                          </div>
-                          <button 
-                            @click="removeHoliday(index)"
-                            class="text-gray-400 hover:text-red-500"
-                          >
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="col-span-3">
-                    <div class="w-full bg-gray-50 p-3 rounded-lg">
-                      <h3 class="text-sm font-medium text-gray-900 mb-3">Special Focus Areas</h3>
-                      <div class="grid grid-cols-2 gap-3">
-                        <label class="inline-flex items-start group relative">
-                          <input 
-                            type="checkbox" 
-                            v-model="formData.focusAreas.collaborative"
-                            class="form-checkbox mt-1 h-4 w-4 text-purple-500 rounded border-gray-300 focus:ring-purple-500"
-                          >
-                          <span class="ml-2">
-                            <span class="block text-sm font-medium text-gray-700">Collaborative Learning</span>
-                          </span>
-                          <button class="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none">
-                            <svg class="w-4 h-4 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                          </button>
-                          <div class="invisible group-hover:visible absolute bottom-full left-0 mb-2 w-48 p-2 bg-gray-900 text-white text-xs rounded shadow-lg">
-                            Team-based learning approach with group activities and projects
-                          </div>
-                        </label>
-                        <label class="inline-flex items-start group relative">
-                          <input 
-                            type="checkbox" 
-                            v-model="formData.focusAreas.presentations"
-                            class="form-checkbox mt-1 h-4 w-4 text-purple-500 rounded border-gray-300 focus:ring-purple-500"
-                          >
-                          <span class="ml-2">
-                            <span class="block text-sm font-medium text-gray-700">Presentations</span>
-                          </span>
-                          <button class="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none">
-                            <svg class="w-4 h-4 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                          </button>
-                          <div class="invisible group-hover:visible absolute bottom-full left-0 mb-2 w-48 p-2 bg-gray-900 text-white text-xs rounded shadow-lg">
-                            Regular opportunities for students to present and develop public speaking skills
-                          </div>
-                        </label>
-                        <label class="inline-flex items-start group relative">
-                          <input 
-                            type="checkbox" 
-                            v-model="formData.focusAreas.classDiscussions"
-                            class="form-checkbox mt-1 h-4 w-4 text-purple-500 rounded border-gray-300 focus:ring-purple-500"
-                          >
-                          <span class="ml-2">
-                            <span class="block text-sm font-medium text-gray-700">Class Discussions</span>
-                          </span>
-                          <button class="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none">
-                            <svg class="w-4 h-4 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                          </button>
-                          <div class="invisible group-hover:visible absolute bottom-full left-0 mb-2 w-48 p-2 bg-gray-900 text-white text-xs rounded shadow-lg">
-                            Emphasis on meaningful dialogue and class-wide discussions
-                          </div>
-                      </label>
-                        <label class="inline-flex items-start group relative">
-                          <input 
-                            type="checkbox" 
-                            v-model="formData.focusAreas.research"
-                            class="form-checkbox mt-1 h-4 w-4 text-purple-500 rounded border-gray-300 focus:ring-purple-500"
-                          >
-                          <span class="ml-2">
-                            <span class="block text-sm font-medium text-gray-700">Research Skills</span>
-                          </span>
-                          <button class="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none">
-                            <svg class="w-4 h-4 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                          </button>
-                          <div class="invisible group-hover:visible absolute bottom-full left-0 mb-2 w-48 p-2 bg-gray-900 text-white text-xs rounded shadow-lg">
-                            Focus on independent exploration and discovery-based learning
-                          </div>
-                      </label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Class Days Selection -->
-                <div class="mt-6 mb-4">
-                  <div class="flex items-center justify-between mb-2">
-                    <h3 class="text-sm font-medium text-gray-700">Class Days</h3>
-                    <label class="inline-flex items-center group relative">
-                      <input 
-                        type="checkbox" 
-                        v-model="formData.hasAlternatingSchedule"
-                        class="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
-                      >
-                      <span class="ml-2 text-sm text-gray-700">Alternating Schedule</span>
-                      <button class="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </button>
-                      <div class="invisible group-hover:visible absolute bottom-full right-0 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg">
-                        Enable alternating schedule to set different class days for Week A and Week B
-                      </div>
-                    </label>
-                  </div>
-
-                  <!-- Regular Schedule -->
-                  <div v-if="!formData.hasAlternatingSchedule" class="flex gap-2 flex-wrap">
-                    <label v-for="day in weekDays" :key="day" class="inline-flex items-center px-3 py-2 border rounded-lg hover:bg-gray-50">
-                      <input 
-                        type="checkbox" 
-                        v-model="formData.classDays[day]"
-                        class="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
-                      >
-                      <span class="ml-2 text-sm text-gray-700">{{ day }}</span>
-                    </label>
-                  </div>
-
-                  <!-- Alternating Schedule -->
-                  <div v-else class="space-y-3">
-                    <!-- Week A -->
-                    <div class="flex items-center gap-2">
-                      <span class="text-sm font-medium text-gray-700 w-16">Week A</span>
-                      <div class="flex gap-2 flex-wrap">
-                        <label v-for="day in weekDays" :key="'A-'+day" class="inline-flex items-center px-3 py-2 border rounded-lg hover:bg-gray-50">
-                          <input 
-                            type="checkbox" 
-                            v-model="formData.classDaysA[day]"
-                            class="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
-                          >
-                          <span class="ml-2 text-sm text-gray-700">{{ day }}</span>
-                        </label>
-                      </div>
-                    </div>
-                    <!-- Week B -->
-                    <div class="flex items-center gap-2">
-                      <span class="text-sm font-medium text-gray-700 w-16">Week B</span>
-                      <div class="flex gap-2 flex-wrap">
-                        <label v-for="day in weekDays" :key="'B-'+day" class="inline-flex items-center px-3 py-2 border rounded-lg hover:bg-gray-50">
-                          <input 
-                            type="checkbox" 
-                            v-model="formData.classDaysB[day]"
-                            class="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
-                          >
-                          <span class="ml-2 text-sm text-gray-700">{{ day }}</span>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Class Duration</label>
-                    <select 
-                      v-model="formData.classDuration"
-                      class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 border-gray-300"
-                    >
-                      <option value="">Select duration</option>
-                      <option value="30">30 minutes</option>
-                      <option value="45">45 minutes</option>
-                      <option value="60">1 hour</option>
-                      <option value="90">1.5 hours</option>
-                      <option value="120">2 hours</option>
-                      <option value="180">3 hours</option>
-                      <option value="360">Half day</option>
-                      <option value="480">Full day</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- Step 1: Course Details -->
+        <CourseDetails 
+          v-if="currentStep === 0"
+        />
 
         <!-- Step 2: Standards -->
         <div v-if="currentStep === 1">
@@ -731,7 +391,7 @@
                 {{ formatDate(formData.startDate) }} - {{ formatDate(formData.endDate) }}
                 <br>
                 <span class="text-sm text-gray-600">
-                  {{ formatDuration(formData.classDuration) }}
+                  {{ formatDuration(formData.lessonDuration) }}
                 </span>
               </div>
             </div>
@@ -771,11 +431,15 @@
 import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useStore } from '../stores/store';
+import CourseDetails from './onboardwizard/CourseDetails.vue';
+import BaseWizardStep from './onboardwizard/BaseWizardStep.vue';
 
 const router = useRouter();
 const route = useRoute();
 const store = useStore();
 const steps = ['Course Details', 'Standards', 'Review'];
+const currentStep = computed(() => store.currentStep);
+const formData = computed(() => store.formData);
 const hasAttemptedNext = ref(false);
 
 const isAddingHoliday = ref(false);
@@ -784,9 +448,6 @@ const newHoliday = ref({
   startDate: '',
   endDate: ''
 });
-
-const formData = computed(() => store.formData);
-const currentStep = computed(() => store.currentStep);
 
 // Set initial subject from URL query
 onMounted(() => {
@@ -872,7 +533,7 @@ const canProceed = computed(() => {
         numberOfStudents: formData.value.numberOfStudents,
         startDate: formData.value.startDate,
         endDate: formData.value.endDate,
-        classDuration: formData.value.classDuration,
+        lessonDuration: formData.value.lessonDuration,
         hasAlternatingSchedule: formData.value.hasAlternatingSchedule,
         classDays: formData.value.classDays,
         classDaysA: formData.value.classDaysA,
@@ -892,7 +553,7 @@ const canProceed = computed(() => {
         formData.value.numberOfStudents !== '' &&
         formData.value.startDate !== '' &&
         formData.value.endDate !== '' &&
-        formData.value.classDuration !== '' &&
+        formData.value.lessonDuration !== '' &&
         (hasRegularClassDays || hasAlternatingClassDays)
       );
     case 1:
@@ -933,7 +594,7 @@ const handleNext = () => {
       studentAgeRange: formData.value.studentAgeRange,
       startDate: formData.value.startDate,
       endDate: formData.value.endDate,
-      classDuration: formData.value.classDuration
+      lessonDuration: formData.value.lessonDuration
     }
   });
 
