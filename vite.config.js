@@ -5,6 +5,7 @@ import path from 'path';
 export default defineConfig({
     plugins: [vue()],
     root: 'src',
+    base: './',
     publicDir: '../public',
     server: {
         port: 3000,
@@ -13,12 +14,8 @@ export default defineConfig({
     build: {
         outDir: '../dist',
         emptyOutDir: true,
-        rollupOptions: {
-            external: [],
-            output: {
-                manualChunks: undefined
-            }
-        }
+        target: 'esnext',
+        minify: 'esbuild'
     },
     resolve: {
         alias: {
