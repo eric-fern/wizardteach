@@ -19,7 +19,7 @@ export const useStore = defineStore('store', {
       startDate: '',
       endDate: '',
       lessonDuration: '',
-      holidays: [], // Each holiday will be { title: string, startDate: string, endDate: string }
+      lessonFrequency: '',
       
       // Student Composition
       studentComposition: {
@@ -107,13 +107,14 @@ export const useStore = defineStore('store', {
            state.formData.numberOfStudents &&
            state.formData.startDate && 
            state.formData.endDate && 
-           state.formData.lessonDuration) : true,
+           state.formData.lessonDuration &&
+           state.formData.lessonFrequency?.trim()) : true,
       studentAgeRange: state.formData.studentAgeRange,
       numberOfStudents: state.formData.numberOfStudents,
-      startDate: state.formData.startDate,
-      endDate: state.formData.endDate,
-      lessonDuration: state.formData.lessonDuration,
-      holidaysCount: state.formData.holidays.length
+      startDate: formatDate(state.formData.startDate),
+      endDate: formatDate(state.formData.endDate),
+      lessonDuration: state.formData.lessonDuration + ' minutes',
+      lessonFrequency: state.formData.lessonFrequency
     }),
 
     canProceed: (state) => {
@@ -127,7 +128,8 @@ export const useStore = defineStore('store', {
             state.formData.numberOfStudents &&
             state.formData.startDate &&
             state.formData.endDate &&
-            state.formData.lessonDuration
+            state.formData.lessonDuration &&
+            state.formData.lessonFrequency?.trim()
           );
 
         case 1: // Standards
@@ -313,7 +315,7 @@ export const useStore = defineStore('store', {
         startDate: '',
         endDate: '',
         lessonDuration: '',
-        holidays: [],
+        lessonFrequency: '',
         studentComposition: {
           esl: false,
           iep: false,
@@ -336,11 +338,6 @@ export const useStore = defineStore('store', {
           sat: false,
           act: false
         }
-      };
-      this.newHoliday = {
-        title: '',
-        startDate: '',
-        endDate: ''
       };
     }
   }

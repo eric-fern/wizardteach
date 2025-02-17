@@ -50,7 +50,8 @@
             <div class="space-y-1 text-xs">
               <div><span class="text-gray-500">Start:</span> {{ formatDate(store.formData.startDate) }}</div>
               <div><span class="text-gray-500">End:</span> {{ formatDate(store.formData.endDate) }}</div>
-              <div><span class="text-gray-500">Duration:</span> {{ store.formData.classDuration }} mins</div>
+              <div><span class="text-gray-500">Duration:</span> {{ store.formData.lessonDuration }} mins</div>
+              <div><span class="text-gray-500">Scheduling:</span> {{ store.formData.lessonFrequency || 'Not set' }}</div>
               <div><span class="text-gray-500">Fun Fridays:</span> {{ store.formData.funFridays ? 'Yes' : 'No' }}</div>
             </div>
           </div>
@@ -102,24 +103,6 @@
               <div><span class="text-gray-500">Type:</span> {{ store.formData.standards.type || 'Not set' }}</div>
               <div v-if="store.formData.standards.type === 'state'">
                 <span class="text-gray-500">State:</span> {{ store.formData.standards.state || 'Not selected' }}
-              </div>
-            </div>
-          </div>
-
-          <!-- Holidays & Breaks -->
-          <div class="space-y-2">
-            <h5 class="text-xs font-semibold text-gray-700 border-b pb-1">Holidays & Breaks</h5>
-            <div class="space-y-1 text-xs">
-              <div v-if="store.formData.holidays.length === 0" class="text-gray-400">
-                No holidays set
-              </div>
-              <div v-else class="space-y-1">
-                <div v-for="(holiday, index) in store.formData.holidays" :key="index" class="text-gray-600">
-                  <div class="font-medium">{{ holiday.title }}</div>
-                  <div class="text-gray-400">
-                    {{ formatDate(holiday.startDate) }} - {{ formatDate(holiday.endDate) }}
-                  </div>
-                </div>
               </div>
             </div>
           </div>
@@ -272,9 +255,7 @@ const handleTestRequest = async () => {
       startDate: store.formData.startDate,
       endDate: store.formData.endDate,
       lessonDuration: store.formData.lessonDuration,
-      
-      // Holidays and Breaks
-      holidays: store.formData.holidays || []
+      lessonFrequency: store.formData.lessonFrequency
     };
     
     const payload = createEmptyRequest();
@@ -303,12 +284,14 @@ const debugInfo = (state) => ({
        state.formData.numberOfStudents &&
        state.formData.startDate && 
        state.formData.endDate && 
-       state.formData.classDuration) : true,
+       state.formData.lessonDuration &&
+       state.formData.lessonFrequency) : true,
   studentAgeRange: state.formData.studentAgeRange,
   numberOfStudents: state.formData.numberOfStudents,
   startDate: formatDate(state.formData.startDate),
   endDate: formatDate(state.formData.endDate),
-  classDuration: state.formData.classDuration + ' minutes',
+  lessonDuration: state.formData.lessonDuration + ' minutes',
+  lessonFrequency: state.formData.lessonFrequency,
   holidays: state.formData.holidays.length + ' holidays'
 });
 </script>

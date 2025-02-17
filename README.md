@@ -42,101 +42,28 @@ graph LR
 ### Frontend Architecture
 ```mermaid
 graph TD
-    %% Core Application Structure
+    %% Core Application
     APP[App.vue] --> ROUTER[Vue Router]
-    ROUTER --> BASE[BaseTemplate.vue]
+    ROUTER --> VIEWS[Views]
     
-    %% Template Structure
-    BASE --> NAV[Navigation]
-    BASE --> HEADER[Header]
-    BASE --> MAIN[Main Content]
-    BASE --> FOOTER[Footer]
-    
-    %% State Management
-    subgraph LocalStores[Local Stores]
-        WIZARD_STATE[Wizard State] -->|Persist| LOCAL_STORAGE[(Local Storage)]
-        DRAFT_STATE[Draft Content] -->|Persist| LOCAL_STORAGE
-    end
-    
-    subgraph ServerStores[Server Stores]
-        AUTH[Auth Store]
-        CONTENT[Content Store]
-        SETTINGS[Settings Store]
-    end
-    
-    %% View System
-    MAIN --> WIZARDS[Wizard Views]
-    MAIN --> DASHBOARD[Dashboard View]
-    MAIN --> MATERIALS[Materials View]
+    %% Main Views
+    VIEWS --> HOME[Home]
+    VIEWS --> DASHBOARD[Dashboard]
+    VIEWS --> WIZARDS[Wizards]
     
     %% Wizard System
-    subgraph WizardSystem[Wizard System]
-        WIZARDS --> ONBOARD[OnboardWizard]
-        WIZARDS --> WORKSHEET[WorksheetWizard]
-        WIZARDS --> SLIDES[SlidesWizard]
-        WIZARDS --> FLASHCARD[FlashcardWizard]
-        
-        subgraph CommonSteps[Common Wizard Steps]
-            COMMON[Common Steps]
-            COMMON --> SUBJECT[Subject Selection]
-            COMMON --> STANDARDS[Standards Selection]
-            COMMON --> PREVIEW[Preview]
-        end
-        
-        ONBOARD --> ONBOARD_STEPS[Steps]
-        WORKSHEET --> WORKSHEET_STEPS[Steps]
-        SLIDES --> SLIDES_STEPS[Steps]
-        FLASHCARD --> FLASHCARD_STEPS[Steps]
-        
-        ONBOARD_STEPS --> COMMON
-        WORKSHEET_STEPS --> COMMON
-        SLIDES_STEPS --> COMMON
-        FLASHCARD_STEPS --> COMMON
-    end
+    WIZARDS --> ONBOARD[Onboarding Wizard]
+    WIZARDS --> MATERIALS[Materials Wizard]
     
-    %% Account Gate
-    subgraph AccountGate[Account Gate]
-        PREVIEW --> SIGNUP{Requires Account?}
-        SIGNUP -->|Yes| AUTH_FLOW[Auth Flow]
-        SIGNUP -->|No| CONTINUE[Continue]
-    end
+    %% State Management
+    PINIA[Pinia Store] --> |State| APP
+    PINIA --> |Local Storage| PERSIST[(Persistence)]
     
-    %% Components
-    subgraph UIComponents[UI Components]
-        FORMS[Form Controls]
-        MODALS[Modal System]
-        TOOLTIPS[Tooltips]
-        NOTIFY[Notifications]
-    end
+    %% Shared Components
+    COMPONENTS[Shared Components] --> |Used By| VIEWS
     
-    subgraph SharedComponents[Shared Components]
-        CALENDAR[Calendar]
-        EDITOR[Rich Editor]
-        AI_CHAT[AI Assistant]
-    end
-    
-    %% State Flow
-    WIZARD_STATE --> WIZARDS
-    AUTH --> DASHBOARD
-    CONTENT --> MATERIALS
-    
-    %% Component Usage
-    WIZARDS -.-> FORMS
-    WIZARDS -.-> MODALS
-    DASHBOARD -.-> FORMS
-    DASHBOARD -.-> CALENDAR
-    MATERIALS -.-> EDITOR
-    MATERIALS -.-> AI_CHAT
-    
-    %% Network Layer
-    subgraph APILayer[API Layer]
-        API[API Client]
-        WS[WebSocket Client]
-    end
-    
-    ServerStores --> API
-    API --> ServerStores
-    WS --> SharedComponents
+    %% API Integration
+    API[API Client] --> |Data| PINIA
 ```
 
 ### Backend Architecture
@@ -359,7 +286,7 @@ Shared steps and components across wizards:
 ```typescript
 // Common wizard steps that can be reused
 interface CommonWizardSteps {
-  SubjectSelection: Component;
+  OnboardEntry: Component;
   StandardsAlignment: Component;
   MaterialPreview: Component;
   GenerationOptions: Component;
