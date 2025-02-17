@@ -1,5 +1,5 @@
 <template>
-  <BaseWizardStep :isValid="isValid">
+  <BaseWizardStep :isValid="isValid" @next="handleNext">
     <!-- Students Section -->
     <div class="mb-8">
       <h2 class="text-xl font-bold text-gray-900 mb-4">Students</h2>
@@ -59,6 +59,74 @@
       <div class="grid grid-cols-2 gap-4">
         <!-- Left Column: Duration and Dates -->
         <div class="space-y-4">
+          <!-- Checkboxes -->
+          <div class="flex flex-col space-y-2">
+            <label class="inline-flex items-center group relative">
+              <input 
+                type="checkbox" 
+                v-model="store.formData.hasDevices"
+                class="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
+              >
+              <span class="ml-2 text-sm text-gray-700">Devices</span>
+              <button class="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
+              <div class="invisible group-hover:visible absolute left-0 ml-6 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-10">
+                Students have access to phones, Chromebooks, or iPads
+              </div>
+            </label>
+            <label class="inline-flex items-center group relative">
+              <input 
+                type="checkbox" 
+                v-model="store.formData.hasFieldTrips"
+                class="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
+              >
+              <span class="ml-2 text-sm text-gray-700">Field Trip</span>
+              <button class="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
+              <div class="invisible group-hover:visible absolute left-0 ml-6 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-10">
+                Ability to conduct educational trips outside the classroom
+              </div>
+            </label>
+            <label class="inline-flex items-center group relative">
+              <input 
+                type="checkbox" 
+                v-model="store.formData.hasProjector"
+                class="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
+              >
+              <span class="ml-2 text-sm text-gray-700">Smartboard/Projector</span>
+              <button class="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
+              <div class="invisible group-hover:visible absolute left-0 ml-6 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-10">
+                Access to digital display technology in the classroom
+              </div>
+            </label>
+            <label class="inline-flex items-center group relative">
+              <input 
+                type="checkbox" 
+                v-model="store.formData.hasLab"
+                class="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
+              >
+              <span class="ml-2 text-sm text-gray-700">Science/Computer Lab Access</span>
+              <button class="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
+              <div class="invisible group-hover:visible absolute left-0 ml-6 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-10">
+                Access to specialized laboratory facilities
+              </div>
+            </label>
+          </div>
+
           <!-- Lesson Duration -->
           <div>
             <div class="flex items-center group relative mb-1">
@@ -129,30 +197,14 @@
 
         <!-- Right Column: Scheduling -->
         <div class="flex flex-col h-full">
-          <div class="flex items-center group relative mb-1">
-            <label class="block text-sm font-medium text-gray-700">Lesson Scheduling</label>
-            <button class="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </button>
-            <div class="invisible group-hover:visible absolute bottom-full left-0 mb-2 w-80 p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-10">
-              Our website is AI-Integrated - Describe your weekly schedule in plain english and we will do the rest.
-            </div>
-            <span class="ml-2 text-sm text-blue-500 font-medium">AI-Enabled ✨</span>
-          </div>
-          <textarea 
-            :value="store.formData.lessonFrequency"
-            @input="(e) => {
-              store.updateFormData('lessonFrequency', e.target.value);
-              e.target.style.height = 'auto';
-              e.target.style.height = e.target.scrollHeight + 'px';
-            }"
+          <TextBoxWithAITag
+            label="Lesson Scheduling"
+            tooltip="Our website is AI-Integrated - Describe your weekly schedule in plain english and we will do the rest."
             placeholder="Describe scheduling for this subject in plain english. Our AI will understand 5 day weeks, A/B block schedules, weekends/nights, and more."
-            class="flex-1 w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 border-gray-300 resize-none overflow-hidden align-top"
-            rows="6"
-            style="vertical-align: top; min-height: 160px;"
-          ></textarea>
+            v-model="store.formData.lessonFrequency"
+            :min-height="'160px'"
+            :max-height="'300px'"
+          />
         </div>
       </div>
     </div>
@@ -161,9 +213,12 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 import BaseWizardStep from './BaseWizardStep.vue';
 import { useStore } from '../../stores/store';
+import TextBoxWithAITag from '../../components/shared/TextBoxWithAITag.vue';
 
+const router = useRouter();
 const store = useStore();
 
 const isValid = computed(() => {
@@ -176,6 +231,12 @@ const isValid = computed(() => {
     store.formData.endDate !== ''
   );
 });
+
+const handleNext = () => {
+  if (isValid.value) {
+    router.push('/onboard/standards');
+  }
+};
 </script>
 
 <style>

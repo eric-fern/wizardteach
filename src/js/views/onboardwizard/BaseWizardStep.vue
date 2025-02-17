@@ -1,54 +1,92 @@
 <template>
-  <div class="space-y-8">
-    <!-- Header Section -->
-    <div v-if="$slots.title || $slots.subtitle || title || subtitle" class="text-center animate-fade-in">
-      <h3 
-        class="heading-2 animate-slide-up" 
-        :style="{ animationDelay: '100ms' }"
-      >
-        <slot name="title">{{ title }}</slot>
-      </h3>
-      <p 
-        v-if="$slots.subtitle || subtitle"
-        class="mt-3 text-lg text-gray-600 max-w-2xl mx-auto animate-slide-up" 
-        :style="{ animationDelay: '200ms' }"
-      >
-        <slot name="subtitle">{{ subtitle }}</slot>
-      </p>
-    </div>
+  <div class="min-h-screen bg-gray-50 p-8">
+    <div class="max-w-3xl mx-auto">
+      <!-- Selection Tags -->
+      <BlueDottedOvalShowsCompletedFormFields />
 
-    <!-- Main Content -->
-    <div 
-      class="animate-fade-in space-y-6"
-      :style="{ animationDelay: '300ms' }"
-    >
-      <slot></slot>
-    </div>
+      <!-- Main Form Content -->
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <!-- Header Section -->
+        <div v-if="$slots.title || $slots.subtitle || title || subtitle" class="text-center animate-fade-in mb-8">
+          <h3 
+            class="heading-2 animate-slide-up" 
+            :style="{ animationDelay: '100ms' }"
+          >
+            <slot name="title">{{ title }}</slot>
+          </h3>
+          <p 
+            v-if="$slots.subtitle || subtitle"
+            class="mt-3 text-lg text-gray-600 max-w-2xl mx-auto animate-slide-up" 
+            :style="{ animationDelay: '200ms' }"
+          >
+            <slot name="subtitle">{{ subtitle }}</slot>
+          </p>
+        </div>
 
-    <!-- Footer/Actions -->
-    <div 
-      v-if="$slots.actions"
-      class="mt-8 animate-fade-in"
-      :style="{ animationDelay: '400ms' }"
-    >
-      <slot name="actions"></slot>
-    </div>
+        <!-- Main Content -->
+        <div 
+          class="animate-fade-in space-y-6"
+          :style="{ animationDelay: '300ms' }"
+        >
+          <slot></slot>
+        </div>
 
-    <!-- Info Section -->
-    <div 
-      v-if="$slots.info"
-      class="mt-12 bg-gradient-subtle rounded-2xl p-8 animate-fade-in"
-      :style="{ animationDelay: '500ms' }"
-    >
-      <slot name="info"></slot>
+        <!-- Footer/Actions -->
+        <div 
+          v-if="$slots.actions"
+          class="mt-8 animate-fade-in"
+          :style="{ animationDelay: '400ms' }"
+        >
+          <slot name="actions"></slot>
+        </div>
+
+        <!-- Info Section -->
+        <div 
+          v-if="$slots.info"
+          class="mt-12 bg-gradient-subtle rounded-2xl p-8 animate-fade-in"
+          :style="{ animationDelay: '500ms' }"
+        >
+          <slot name="info"></slot>
+        </div>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="flex justify-between mt-6">
+        <button 
+          v-if="store.currentStep > 0"
+          @click="store.prevStep()"
+          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+        >
+          Previous
+        </button>
+        <div class="flex-1"></div>
+        <button 
+          v-if="store.currentStep < store.steps.length - 1"
+          @click="$emit('next')"
+          :disabled="!isValid"
+          :class="[
+            'px-4 py-2 text-sm font-medium rounded-lg',
+            isValid 
+              ? 'bg-blue-500 text-white hover:bg-blue-600' 
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          ]"
+        >
+          Next
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { defineProps, defineEmits } from 'vue';
+import { useStore } from '../../stores/store';
+import BlueDottedOvalShowsCompletedFormFields from '../../components/shared/BlueDottedOvalShowsCompletedFormFields.vue';
 
-const props = defineProps({
+const store = useStore();
+const emit = defineEmits(['next']);
+
+defineProps({
   title: {
     type: String,
     default: ''
@@ -67,7 +105,14 @@ const props = defineProps({
   }
 });
 
-const emit = defineEmits(['update:formData', 'validate']);
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  return new Date(dateString).toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  });
+};
 </script>
 
 <style scoped>

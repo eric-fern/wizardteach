@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Home from '../views/Home.vue';
+import OnboardEntry from '../views/onboardwizard/OnboardEntry.vue';
+import CourseDetails from '../views/onboardwizard/CourseDetails.vue';
+import ChooseStandards from '../views/onboardwizard/ChooseStandards.vue';
 import CurriculumWizard from '../views/CurriculumWizard.vue';
 import Dashboard from '../views/Dashboard.vue';
 import MaterialsView from '../views/MaterialsView.vue';
@@ -8,7 +10,17 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: Home
+    component: OnboardEntry
+  },
+  {
+    path: '/onboard/course-details',
+    name: 'CourseDetails',
+    component: CourseDetails
+  },
+  {
+    path: '/onboard/standards',
+    name: 'ChooseStandards',
+    component: ChooseStandards
   },
   {
     path: '/create',

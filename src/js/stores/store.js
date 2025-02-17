@@ -21,6 +21,18 @@ export const useStore = defineStore('store', {
       lessonDuration: '',
       lessonFrequency: '',
       
+      // Resource Availability
+      hasDevices: false,
+      hasFieldTrips: false,
+      hasProjector: false,
+      hasLab: false,
+      
+      // Checkboxes
+      one: false,
+      two: false,
+      three: false,
+      four: false,
+      
       // Student Composition
       studentComposition: {
         esl: false,
@@ -316,6 +328,10 @@ export const useStore = defineStore('store', {
         endDate: '',
         lessonDuration: '',
         lessonFrequency: '',
+        hasDevices: false,
+        hasFieldTrips: false,
+        hasProjector: false,
+        hasLab: false,
         studentComposition: {
           esl: false,
           iep: false,

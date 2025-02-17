@@ -1,38 +1,58 @@
 <template>
-  <BaseWizardStep :isValid="isValid">
-    <div class="text-center mb-8">
-      <h2 class="text-xl font-bold text-gray-900 mb-4">What subject would you like to teach?</h2>
-      <p class="text-gray-600">
-        This will help us create customized teaching materials for your class
-      </p>
-    </div>
+  <div class="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div class="max-w-md w-full">
+      <div class="text-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">
+          Generate Lesson Plans and Teaching Materials with AI
+        </h1>
+        <p class="text-lg text-gray-600">
+          Create professional teaching materials in minutes
+        </p>
+      </div>
 
-    <div class="max-w-md mx-auto">
-      <div class="mb-6">
-        <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">
-          Subject
-        </label>
-        <input
-          id="subject"
-          :value="store.formData.subject"
-          @input="store.updateFormData('subject', $event.target.value)"
-          type="text"
-          placeholder="e.g., Mathematics, History, Science"
-          class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        />
+      <div class="bg-white rounded-lg shadow-sm p-6">
+        <div class="mb-6">
+          <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">
+            What subject would you like to teach?
+          </label>
+          <input
+            id="subject"
+            v-model="subject"
+            type="text"
+            placeholder="e.g., Mathematics, History, Science"
+            class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            @keyup.enter="startWizard"
+          />
+        </div>
+
+        <button
+          @click="startWizard"
+          class="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium"
+          :disabled="!isValid"
+        >
+          Create Curriculum
+        </button>
       </div>
     </div>
-  </BaseWizardStep>
+  </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import BaseWizardStep from './BaseWizardStep.vue';
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { useStore } from '../../stores/store';
 
+const router = useRouter();
 const store = useStore();
+const subject = ref('');
 
 const isValid = computed(() => {
-  return store.formData.subject.trim() !== '';
+  return subject.value.trim() !== '';
 });
+
+const startWizard = () => {
+  if (!isValid.value) return;
+  store.updateFormData('subject', subject.value.trim());
+  router.push('/onboard/course-details');
+};
 </script> 
