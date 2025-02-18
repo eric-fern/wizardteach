@@ -25,23 +25,21 @@ Another idea is auto grader
 
 ## System Architecture
 
-- We have a lot of components in components/shared Always check there before building from scratch.
-- We have a lot of views in src/js/views Always check there before building from scratch.
-- When you make changes make sure to check routes and file names across our project.
-
+### Core Architecture Principles
+- **Centralized Navigation**: All wizard step navigation is managed by `BaseWizardStep`
+- **State Management**: Pinia store with predictable state updates and debug capabilities
+- **Component Reusability**: Shared components for common functionality
+- **Debug System**: Comprehensive debug panel for development and troubleshooting
 
 ### Overall System
 ```mermaid
 graph LR
-    UI[Vue Frontend] -->|Axios| AC[API Client]
-    AC -->|HTTP/WS| CF[Cloudflare Edge Computing]
-    CF -->|Route| AF[Azure Functions]
-    AF -->|Generation| SK[Semantic Kernel]
-    AF -->|Storage| DB[CosmosDB]
-    SK -->|Response| AF
-    AF -->|Response| CF
-    CF -->|Response| AC
-    AC -->|State Update| UI
+    UI[Vue Frontend] -->|State| Store[Pinia Store]
+    UI -->|Navigation| Router[Vue Router]
+    Store -->|Debug| Debug[Debug Panel]
+    Router -->|Guard| Nav[Navigation Control]
+    Nav -->|Sync| Store
+    UI -->|API| Backend[Backend Services]
 ```
 
 ### Frontend Architecture
@@ -52,115 +50,106 @@ graph TD
     ROUTER --> VIEWS[Views]
     
     %% Main Views
-    VIEWS --> HOME[Home]
-    VIEWS --> DASHBOARD[Dashboard]
-    VIEWS --> WIZARDS[Wizards]
+    VIEWS --> WIZARD[Wizard System]
+    WIZARD --> ONBOARD[Onboarding]
+    WIZARD --> MATERIALS[Materials]
     
-    %% Wizard System
-    WIZARDS --> ONBOARD[Onboarding Wizard]
-    WIZARDS --> MATERIALS[Materials Wizard]
+    %% Wizard Components
+    ONBOARD --> BASE[BaseWizardStep]
+    BASE --> NAV[Centralized Navigation]
+    BASE --> PROGRESS[Progress Tracking]
     
     %% State Management
-    PINIA[Pinia Store] --> |State| APP
-    PINIA --> |Local Storage| PERSIST[(Persistence)]
-    PINIA --> |Debug State| DEBUG[Debug Panel]
-    
-    %% Shared Components
-    COMPONENTS[Shared Components] --> |Used By| VIEWS
-    
-    %% API Integration
-    API[API Client] --> |Data| PINIA
+    STORE[Pinia Store] --> |State| APP
+    STORE --> |Debug| DEBUG[Debug Panel]
 ```
 
-### Backend Architecture
-```mermaid
-graph LR
-    subgraph Client
-        AC[API Client] -->|HTTP/WS| CF
-    end
-    
-    subgraph Edge
-        CF[Cloudflare Edge Computing]
-        CF -->|"Auth, Route, Cache"| AF
-    end
-    
-    subgraph Backend
-        AF[Azure Functions] -->|Generate| SK[Semantic Kernel]
-        AF -->|Store| DB[CosmosDB]
-        SK -->|Content| AF
-        DB -->|Data| AF
-    end
-    
-    AF -->|Response| CF
-    CF -->|Response| AC
+## File Structure
+```
+src/
+└── js/
+    ├── components/
+    │   └── shared/                    # Shared components
+    │       ├── BlueDottedOvalShowsCompletedFormFields.vue
+    │       ├── DebugPanel.vue         # Debug interface
+    │       ├── StateTree.vue          # State visualization
+    │       ├── TextBoxWithAITag.vue
+    │       ├── UploadAndHoldFileWithinPinia.vue
+    │       └── GlobalNav.vue
+    │
+    ├── views/
+    │   ├── Dashboard.vue
+    │   ├── MaterialsView.vue
+    │   ├── CurriculumWizard.vue
+    │   └── onboardwizard/            # Onboarding wizard views
+    │       ├── BaseWizardStep.vue    # Core navigation component
+    │       ├── OnboardEntry.vue
+    │       ├── CourseDetails.vue
+    │       └── ChooseStandards.vue
+    │
+    ├── stores/                        # Pinia stores
+    │   └── store.js
+    │
+    ├── router/                        # Vue Router configuration
+    │   └── index.js
+    │
+    ├── models/                        # Data models
+    │   └── Request.js
+    │
+    ├── app.js                         # Application entry point
+    └── App.vue                        # Root component
 ```
 
 ## Implementation Phases
 
-### Current (Phase 1: Local Setup)
-- Streamlined teacher input wizard (no account required)
-  - Subject and grade level
-  - Class size and duration
-  - Basic scheduling
-  - Standards selection
-- Local state persistence
-- Limited preview capabilities
-- Account creation gate before generation
-- Centralized debug system
+### Current (Phase 1: Enhanced Local Setup)
+- Streamlined teacher input wizard with centralized navigation
+- Comprehensive debug system
   - Navigation state tracking
   - Form validation monitoring
   - Field completion status
+- Robust state management
+  - Centralized store
+  - Predictable updates
+  - Debug visualization
 
 ```typescript
-// Local Setup Store (Browser Storage)
+// Enhanced Local Setup Store
 interface LocalSetupStore {
-  // Debug State
-  debug: {
-    isEnabled: boolean;
-    navigationState: {
-      currentStep: number;
-      steps: string[];
-    };
-    formValidation: {
-      isValid: boolean;
-      requiredFields: string[];
-    };
+  // Navigation State
+  navigation: {
+    currentStep: number;
+    steps: string[];
+    isValid: boolean;
   };
 
-  basicInfo: {
+  // Form Data
+  formData: {
     subject: string;
     studentAgeRange: string;
     numberOfStudents: number;
     startDate: string;
     endDate: string;
     lessonDuration: number;
+    standards: {
+      selectedType: string;
+      state?: string;
+      customStandards?: {
+        file: File | null;
+        status: string | null;
+      };
+    };
   };
-  standards: {
-    type: string;
-    state?: string;
-  };
-  // Persist configuration
-  persist: {
-    storage: Storage;
-    key: string;
-  };
-}
 
-// Form Field Status
-interface FormFieldStatus {
-  value: any;
-  isComplete: boolean;
-}
-
-// Debug Panel Configuration
-interface DebugPanelConfig {
-  sections: {
-    navigation: boolean;
-    validation: boolean;
-    formStatus: boolean;
+  // Debug Configuration
+  debug: {
+    isEnabled: boolean;
+    panels: {
+      navigation: boolean;
+      validation: boolean;
+      state: boolean;
+    };
   };
-  persistence: boolean;
-  eventLogging: boolean;
 }
 ```
 
@@ -225,33 +214,29 @@ interface CollaborationState {
 ## Technical Stack
 - Vue 3 + Composition API
 - Pinia for state management
-  - Separate stores for setup and customization
-  - Rich editing history support
-- AI-powered week assistant
-- Real-time collaboration (future)
+  - Centralized navigation state
+  - Debug capabilities
+  - Form validation tracking
+- Comprehensive debug system
+  - State visualization
+  - Navigation tracking
+  - Validation monitoring
 
 ## Development Process
 
 ### Current Focus
-1. Complete local setup wizard
-2. Implement draft state persistence
-3. Build account creation gate
-4. Design server data migration
-5. Establish wizard template structure
-6. Implement centralized debugging
-   - Navigation state tracking
-   - Form validation monitoring
-   - Field completion status
+1. Maintain centralized navigation
+2. Enhance debug capabilities
+3. Ensure consistent state management
+4. Implement proper validation
+5. Prepare for server integration
 
-### Next Steps
-1. Implement server-side storage
-2. Add rich customization features
-3. Develop additional wizard types
-4. Enable premium features
-5. Consider debug panel extensibility
-   - Plugin system for new features
-   - Debug event logging
-   - Persistence configuration
+### Code Quality Guidelines
+1. **Navigation**: Use `BaseWizardStep` for all wizard navigation
+2. **State Management**: Update store through defined actions
+3. **Debugging**: Utilize debug panel for development
+4. **Validation**: Implement consistent validation patterns
+5. **Components**: Leverage shared components
 
 ## User Experience Flow
 1. **Phase 1: Local Setup**

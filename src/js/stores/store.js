@@ -34,26 +34,33 @@ export const useStore = defineStore('store', {
       lessonDuration: '',
       startDate: '',
       endDate: '',
+      lessonFrequency: '', // For TextBoxWithAITag in CourseDetails
+      
+      // Resource Availability
+      hasDevices: false,
+      hasFieldTrips: false,
+      hasProjector: false,
+      hasLab: false,
+      
+      // Student Count
+      numberOfStudents: '',
       
       // Standards & Requirements
       standards: {
-        type: '', // 'common-core', 'state', 'ib', 'ap'
-        state: '', // if type is 'state'
-      },
-
-      // Student Composition
-      studentComposition: {
-        esl: false,
-        iep: false,
-        gifted: false
-      },
-
-      // Test Prep
-      testPrep: {
-        ap: false,
-        ib: false,
-        sat: false,
-        act: false
+        // Current Selection
+        selectedType: '', // 'common-core' | 'state' | 'custom'
+        state: '', // Only used when selectedType is 'state'
+        
+        // Custom Standards Upload
+        customStandards: {
+          file: null, // The PDF File object
+          status: null, // 'pending' | 'processing' | 'ready'
+          metadata: {
+            filename: '',
+            size: 0,
+            uploadDate: null
+          }
+        }
       }
     },
 
@@ -82,9 +89,10 @@ export const useStore = defineStore('store', {
     },
 
     states: [
-      { code: 'AL', name: 'Alabama' },
-      { code: 'AK', name: 'Alaska' },
-      // ... rest of states
+      { code: 'CA', name: 'California' },
+      { code: 'NY', name: 'New York' },
+      { code: 'TX', name: 'Texas' }
+      // Add more as needed
     ],
     
     standardsTypes: {
@@ -92,6 +100,42 @@ export const useStore = defineStore('store', {
       'state': 'State Standards',
       'ib': 'International Baccalaureate',
       'ap': 'Advanced Placement'
+    },
+
+    // Standards Reference Data
+    standardsConfig: {
+      types: {
+        'common-core': {
+          label: 'Common Core Standards',
+          description: 'National standards for K-12 education'
+        },
+        'state': {
+          label: 'State Standards',
+          description: 'Standards specific to your state'
+        },
+        'custom': {
+          label: 'Custom Standards',
+          description: 'Upload your own standards document',
+          aiEnabled: true
+        }
+      },
+      states: [
+        { code: 'CA', name: 'California' },
+        { code: 'NY', name: 'New York' },
+        { code: 'TX', name: 'Texas' }
+      ]
+    },
+
+    // PDF Upload State
+    uploadedMaterials: {
+      pdf: null, // The actual PDF File object
+      type: null, // 'standards' | 'curriculum' | 'textbook'
+      status: null, // 'pending' | 'processing' | 'ready'
+      metadata: {
+        filename: '',
+        size: 0,
+        uploadDate: null
+      }
     }
   }),
 
@@ -147,23 +191,32 @@ export const useStore = defineStore('store', {
               state.formData.studentAgeRange &&
               state.formData.lessonDuration &&
               state.formData.startDate &&
-              state.formData.endDate
+              state.formData.endDate &&
+              state.formData.lessonFrequency &&
+              state.formData.numberOfStudents
             ),
             requiredFields: [
               'studentAgeRange',
               'lessonDuration',
               'startDate',
-              'endDate'
+              'endDate',
+              'lessonFrequency',
+              'numberOfStudents'
             ]
           };
 
         case 2: // Standards
           return {
             isValid: !!(
-              state.formData.standards.type &&
-              (state.formData.standards.type !== 'state' || state.formData.standards.state)
+              state.formData.standards.selectedType &&
+              (state.formData.standards.selectedType !== 'state' || state.formData.standards.state) &&
+              (state.formData.standards.selectedType !== 'custom' || state.formData.standards.customStandards.file)
             ),
-            requiredFields: ['standards.type', 'standards.state']
+            requiredFields: [
+              'standards.selectedType',
+              ...(state.formData.standards.selectedType === 'state' ? ['standards.state'] : []),
+              ...(state.formData.standards.selectedType === 'custom' ? ['standards.customStandards.file'] : [])
+            ]
           };
 
         case 3: // Review
@@ -187,16 +240,56 @@ export const useStore = defineStore('store', {
     },
 
     getStateName: (state) => (code) => {
-      const state = state.states.find(s => s.code === code);
+      const state = state.standardsConfig.states.find(s => s.code === code);
       return state ? state.name : code;
     },
 
     getStandardsTypeLabel: (state) => (type) => {
-      return state.standardsTypes[type] || type;
+      return state.standardsConfig.types[type]?.label || type;
+    },
+
+    getStandardsTypeDescription: (state) => (type) => {
+      return state.standardsConfig.types[type]?.description || '';
     },
 
     formatDuration: (state) => (minutes) => {
       return state.durations[minutes] || `${minutes} minutes`;
+    },
+
+    // Add standards-specific getters
+    standardsFormStatus: (state) => ({
+      selectedType: {
+        value: state.formData.standards.selectedType,
+        isComplete: !!state.formData.standards.selectedType
+      },
+      state: {
+        value: state.formData.standards.state,
+        isComplete: state.formData.standards.selectedType !== 'state' || !!state.formData.standards.state
+      },
+      customFile: {
+        value: state.formData.standards.customStandards.file?.name || '',
+        isComplete: state.formData.standards.selectedType !== 'custom' || !!state.formData.standards.customStandards.file
+      }
+    }),
+
+    // Update existing formFieldStatus getter to include standards
+    formFieldStatus(state) {
+      return {
+        ...this.existingFormFieldStatus,
+        standards: this.standardsFormStatus
+      }
+    },
+
+    // Add validation getter for standards step
+    isStandardsStepValid: (state) => {
+      const standards = state.formData.standards;
+      if (standards.selectedType === 'state') {
+        return !!standards.state;
+      }
+      if (standards.selectedType === 'custom') {
+        return !!standards.customStandards.file;
+      }
+      return !!standards.selectedType;
     }
   },
 
@@ -286,6 +379,97 @@ export const useStore = defineStore('store', {
       if (this.formData.standards.type === 'ib') {
         this.formData.testPrep.ib = true;
       }
+    },
+
+    // Update standards selection
+    setStandardsType(type) {
+      this.formData.standards.selectedType = type;
+      // Clear state if not state standards
+      if (type !== 'state') {
+        this.formData.standards.state = '';
+      }
+      // Clear custom file if not custom
+      if (type !== 'custom') {
+        this.formData.standards.customStandards = {
+          file: null,
+          status: null,
+          metadata: {
+            filename: '',
+            size: 0,
+            uploadDate: null
+          }
+        };
+      }
+    },
+
+    setStateStandard(state) {
+      this.formData.standards.state = state;
+    },
+
+    // PDF handling actions
+    setPdfMaterial(file) {
+      this.uploadedMaterials.pdf = file
+      this.uploadedMaterials.metadata = {
+        filename: file.name,
+        size: file.size,
+        uploadDate: new Date().toISOString()
+      }
+      this.uploadedMaterials.status = 'pending'
+      this.uploadedMaterials.type = 'standards' // Since we're using this for standards
+    },
+
+    clearPdfMaterial() {
+      this.uploadedMaterials.pdf = null
+      this.uploadedMaterials.type = null
+      this.uploadedMaterials.status = null
+      this.uploadedMaterials.metadata = {
+        filename: '',
+        size: 0,
+        uploadDate: null
+      }
+    },
+
+    setPdfType(type) {
+      this.uploadedMaterials.type = type
+    },
+
+    setPdfStatus(status) {
+      this.uploadedMaterials.status = status
+    },
+
+    setCustomStandardsFile(file) {
+      this.formData.standards.customStandards = {
+        file,
+        status: 'pending',
+        metadata: {
+          filename: file.name,
+          size: file.size,
+          uploadDate: new Date().toISOString()
+        }
+      };
+    },
+
+    clearCustomStandardsFile() {
+      this.formData.standards.customStandards = {
+        file: null,
+        status: null,
+        metadata: {
+          filename: '',
+          size: 0,
+          uploadDate: null
+        }
+      };
+    },
+
+    // Add step tracking
+    setCurrentStep(step) {
+      console.log('Store: Setting current step from', this.currentStep, 'to', step);
+      this.currentStep = step;
     }
+  },
+
+  // Add persistence configuration
+  persist: {
+    paths: ['formData']
   }
 }); 

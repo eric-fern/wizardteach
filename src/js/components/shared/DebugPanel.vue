@@ -15,7 +15,7 @@
 
     <!-- Debug Content -->
     <div v-if="isDebugVisible" class="fixed bottom-20 right-4 z-[9998] w-[600px] max-h-[80vh] bg-gray-50 rounded-lg border border-gray-200 shadow-xl flex flex-col">
-      <!-- Header (Fixed) -->
+      <!-- Header -->
       <div class="p-4 border-b border-gray-200 bg-gray-50">
         <div class="flex justify-between items-center">
           <div class="flex items-center gap-2">
@@ -23,184 +23,77 @@
             <span class="text-xs text-blue-500">(synced with Pinia store)</span>
           </div>
           <div class="flex items-center gap-2">
-            <span class="text-sm text-gray-600">Current Step:</span>
-            <span class="text-sm font-medium text-blue-600">
-              {{ store.currentStep + 1 }}: {{ store.steps[store.currentStep] }}
-            </span>
+            <button @click="expandAll" class="text-xs text-blue-600 hover:text-blue-700">Expand All</button>
+            <button @click="collapseAll" class="text-xs text-blue-600 hover:text-blue-700">Collapse All</button>
           </div>
         </div>
       </div>
 
       <!-- Scrollable Content -->
       <div class="flex-1 overflow-y-auto p-4">
-        <div class="grid grid-cols-2 gap-4">
-          <!-- Basic Info -->
+        <div class="space-y-4">
+          <!-- Navigation State -->
           <div class="space-y-2">
-            <h5 class="text-xs font-semibold text-gray-700 border-b pb-1">Basic Information</h5>
-            <div class="space-y-1 text-xs">
-              <div><span class="text-gray-500">Subject:</span> {{ store.formData.subject }}</div>
-              <div><span class="text-gray-500">Age Range:</span> {{ store.formData.studentAgeRange }}</div>
-              <div><span class="text-gray-500">Students:</span> {{ store.formData.numberOfStudents }}</div>
-            </div>
-          </div>
-
-          <!-- Schedule -->
-          <div class="space-y-2">
-            <h5 class="text-xs font-semibold text-gray-700 border-b pb-1">Schedule</h5>
-            <div class="space-y-1 text-xs">
-              <div><span class="text-gray-500">Start:</span> {{ formatDate(store.formData.startDate) }}</div>
-              <div><span class="text-gray-500">End:</span> {{ formatDate(store.formData.endDate) }}</div>
-              <div><span class="text-gray-500">Duration:</span> {{ store.formData.lessonDuration }} mins</div>
-              <div><span class="text-gray-500">Scheduling:</span> {{ store.formData.lessonFrequency || 'Not set' }}</div>
-              <div><span class="text-gray-500">Fun Fridays:</span> {{ store.formData.funFridays ? 'Yes' : 'No' }}</div>
-            </div>
-          </div>
-
-          <!-- Class Days -->
-          <div class="space-y-2">
-            <h5 class="text-xs font-semibold text-gray-700 border-b pb-1">Class Days</h5>
-            <div class="space-y-1 text-xs">
-              <template v-if="!store.formData.hasAlternatingSchedule">
-                <div><span class="text-gray-500">Schedule Type:</span> Regular</div>
-                <div class="flex gap-1 flex-wrap">
-                  <span 
-                    v-for="(enabled, day) in store.formData.classDays" 
-                    :key="day"
-                    :class="enabled ? 'text-blue-600' : 'text-gray-400'"
-                  >
-                    {{ day }}
-                  </span>
-                </div>
-              </template>
-              <template v-else>
-                <div><span class="text-gray-500">Schedule Type:</span> Alternating</div>
-                <div><span class="text-gray-500">Week A:</span>
-                  <span 
-                    v-for="(enabled, day) in store.formData.classDaysA" 
-                    :key="day"
-                    :class="enabled ? 'text-blue-600 ml-1' : 'text-gray-400 ml-1'"
-                  >
-                    {{ day }}
-                  </span>
-                </div>
-                <div><span class="text-gray-500">Week B:</span>
-                  <span 
-                    v-for="(enabled, day) in store.formData.classDaysB" 
-                    :key="day"
-                    :class="enabled ? 'text-blue-600 ml-1' : 'text-gray-400 ml-1'"
-                  >
-                    {{ day }}
-                  </span>
-                </div>
-              </template>
-            </div>
-          </div>
-
-          <!-- Standards -->
-          <div class="space-y-2">
-            <h5 class="text-xs font-semibold text-gray-700 border-b pb-1">Standards</h5>
-            <div class="space-y-1 text-xs">
-              <div><span class="text-gray-500">Type:</span> {{ store.formData.standards.type || 'Not set' }}</div>
-              <div v-if="store.formData.standards.type === 'state'">
-                <span class="text-gray-500">State:</span> {{ store.formData.standards.state || 'Not selected' }}
-              </div>
-            </div>
-          </div>
-
-          <!-- Focus Areas -->
-          <div class="space-y-2">
-            <h5 class="text-xs font-semibold text-gray-700 border-b pb-1">Focus Areas</h5>
-            <div class="space-y-2 text-xs">
-              <!-- Learning Focus -->
-              <div>
-                <div class="text-gray-500 mb-1">Learning Focus:</div>
-                <div class="flex flex-wrap gap-1">
-                  <span 
-                    v-for="(enabled, focus) in store.formData.focusAreas" 
-                    :key="focus"
-                    :class="enabled ? 'text-blue-600' : 'text-gray-400'"
-                  >
-                    {{ formatFocusArea(focus) }}{{ enabled ? '' : ' (disabled)' }}
-                  </span>
-                </div>
-              </div>
-              
-              <!-- Test Prep -->
-              <div>
-                <div class="text-gray-500 mb-1">Test Preparation:</div>
-                <div class="flex flex-wrap gap-1">
-                  <span 
-                    v-for="(enabled, test) in store.formData.testPrep" 
-                    :key="test"
-                    :class="enabled ? 'text-blue-600' : 'text-gray-400'"
-                  >
-                    {{ test.toUpperCase() }}{{ enabled ? '' : ' (disabled)' }}
-                  </span>
-                </div>
-              </div>
-
-              <!-- Student Composition -->
-              <div>
-                <div class="text-gray-500 mb-1">Student Composition:</div>
-                <div class="flex flex-wrap gap-1">
-                  <span 
-                    v-for="(enabled, type) in store.formData.studentComposition" 
-                    :key="type"
-                    :class="enabled ? 'text-blue-600' : 'text-gray-400'"
-                  >
-                    {{ type.toUpperCase() }}{{ enabled ? '' : ' (disabled)' }}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- HTTP Request Testing -->
-          <div class="space-y-2 col-span-2">
-            <h5 class="text-xs font-semibold text-gray-700 border-b pb-1">HTTP Request Testing</h5>
-            <div class="flex items-center space-x-4">
-              <button
-                @click="handleTestRequest"
-                :disabled="isGenerating"
-                class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-300 flex items-center space-x-2 text-xs"
-              >
-                <span>Test API</span>
-                <svg v-if="requestSuccess" class="w-4 h-4 text-white animate-scale-in" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                </svg>
+            <div class="flex items-center justify-between">
+              <h5 class="text-xs font-semibold text-gray-700">Navigation</h5>
+              <button @click="toggleSection('navigation')" class="text-xs text-gray-500">
+                {{ expandedSections.navigation ? 'Collapse' : 'Expand' }}
               </button>
-              <div v-if="debugError" class="text-red-500 text-xs">
-                {{ debugError }}
+            </div>
+            <div v-if="expandedSections.navigation" class="pl-4">
+              <div class="text-xs">
+                <div class="flex items-center justify-between py-1">
+                  <span class="text-gray-600">Current Step:</span>
+                  <span class="text-gray-800">{{ store.currentStep }} ({{ store.steps[store.currentStep] }})</span>
+                </div>
+                <div class="flex items-center justify-between py-1">
+                  <span class="text-gray-600">Total Steps:</span>
+                  <span class="text-gray-800">{{ store.steps.length }}</span>
+                </div>
               </div>
             </div>
-            <div v-if="lastRequestData" class="mt-2">
-              <div class="text-xs text-gray-500 mb-1">Last request data:</div>
-              <pre class="text-xs p-2 bg-gray-200 rounded overflow-auto max-h-32">{{ lastRequestData }}</pre>
+          </div>
+
+          <!-- Form Data -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <h5 class="text-xs font-semibold text-gray-700">Form Data</h5>
+              <button @click="toggleSection('formData')" class="text-xs text-gray-500">
+                {{ expandedSections.formData ? 'Collapse' : 'Expand' }}
+              </button>
             </div>
-            <div v-if="lastResponse" class="mt-2">
-              <div class="text-xs text-gray-500 mb-1">Last response:</div>
-              <pre class="text-xs p-2 bg-gray-200 rounded overflow-auto max-h-32">{{ lastResponse }}</pre>
+            <div v-if="expandedSections.formData" class="pl-4">
+              <StateTree 
+                :data="filteredFormData" 
+                :expanded="expandedPaths"
+                @toggle="togglePath"
+              />
             </div>
           </div>
 
           <!-- Validation Status -->
-          <div class="space-y-2 col-span-2">
-            <h5 class="text-xs font-semibold text-gray-700 border-b pb-1">Step Validation</h5>
-            <div class="space-y-2">
-              <div class="flex items-center justify-between">
-                <span class="text-xs text-gray-600">Current Step Valid:</span>
-                <span :class="store.currentStepValidation.isValid ? 'text-green-600' : 'text-red-600'" class="text-xs font-medium">
-                  {{ store.currentStepValidation.isValid ? 'Yes' : 'No' }}
-                </span>
-              </div>
-              <div v-if="!store.currentStepValidation.isValid" class="text-xs text-gray-500">
-                Required fields:
-                <div class="mt-1 space-y-1">
-                  <div v-for="field in store.currentStepValidation.requiredFields" :key="field"
-                    :class="getFieldStatus(field).isComplete ? 'text-green-600' : 'text-red-600'"
-                  >
-                    {{ field }}: {{ getFieldStatus(field).isComplete ? 'Complete' : 'Incomplete' }}
-                  </div>
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <h5 class="text-xs font-semibold text-gray-700">Validation</h5>
+              <button @click="toggleSection('validation')" class="text-xs text-gray-500">
+                {{ expandedSections.validation ? 'Collapse' : 'Expand' }}
+              </button>
+            </div>
+            <div v-if="expandedSections.validation" class="pl-4">
+              <div class="text-xs">
+                <div class="flex items-center justify-between py-1">
+                  <span class="text-gray-600">Current Step Valid:</span>
+                  <span :class="store.currentStepValidation.isValid ? 'text-green-600' : 'text-red-600'">
+                    {{ store.currentStepValidation.isValid ? 'Yes' : 'No' }}
+                  </span>
+                </div>
+                <div v-if="store.currentStepValidation.requiredFields.length > 0" class="mt-2">
+                  <span class="text-gray-600">Required Fields:</span>
+                  <ul class="mt-1 list-disc list-inside">
+                    <li v-for="field in store.currentStepValidation.requiredFields" :key="field" class="text-gray-800">
+                      {{ field }}
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
@@ -212,175 +105,114 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useStore } from '@/stores/store';
-import { apiService } from '@/api/apiService';
-import { createEmptyRequest } from '@/models/Request';
+import StateTree from './StateTree.vue';
 
+// Store initialization
 const store = useStore();
-const isDebugVisible = ref(false);
-const isGenerating = ref(false);
-const requestSuccess = ref(false);
-const debugError = ref(null);
-const lastRequestData = ref(null);
-const lastResponse = ref(null);
 
+// UI State
+const isDebugVisible = ref(false);
+const expandedSections = ref({
+  navigation: true,
+  formData: true,
+  validation: true
+});
+const expandedPaths = ref(new Set());
+
+// Computed property to filter form data to only show what we use
+const filteredFormData = computed(() => {
+  const { formData } = store;
+  return {
+    // Basic Info
+    subject: formData.subject,
+    studentAgeRange: formData.studentAgeRange,
+    lessonDuration: formData.lessonDuration,
+    startDate: formData.startDate,
+    endDate: formData.endDate,
+    lessonFrequency: formData.lessonFrequency,
+    numberOfStudents: formData.numberOfStudents,
+    
+    // Resource Availability
+    resources: {
+      hasDevices: formData.hasDevices,
+      hasFieldTrips: formData.hasFieldTrips,
+      hasProjector: formData.hasProjector,
+      hasLab: formData.hasLab
+    },
+    
+    // Standards
+    standards: {
+      selectedType: formData.standards.selectedType,
+      state: formData.standards.state,
+      customStandards: formData.standards.customStandards
+    }
+  };
+});
+
+// Toggle handlers
 const toggleDebug = () => {
-  console.log('Debug toggled:', isDebugVisible.value);
-  // Save debug visibility state to localStorage
   localStorage.setItem('debugPanelVisible', isDebugVisible.value);
-  // Enable/disable debug mode in store
   store.setDebugMode(isDebugVisible.value);
 };
 
-// Load debug visibility state from localStorage on mount
+const toggleSection = (section) => {
+  expandedSections.value[section] = !expandedSections.value[section];
+};
+
+const togglePath = (path) => {
+  if (expandedPaths.value.has(path)) {
+    expandedPaths.value.delete(path);
+  } else {
+    expandedPaths.value.add(path);
+  }
+};
+
+const expandAll = () => {
+  Object.keys(expandedSections.value).forEach(key => {
+    expandedSections.value[key] = true;
+  });
+  // Expand all state paths
+  const expandAllPaths = (obj, parentPath = '') => {
+    if (typeof obj !== 'object' || obj === null) return;
+    Object.keys(obj).forEach(key => {
+      const path = parentPath ? `${parentPath}.${key}` : key;
+      expandedPaths.value.add(path);
+      expandAllPaths(obj[key], path);
+    });
+  };
+  expandAllPaths(filteredFormData.value);
+};
+
+const collapseAll = () => {
+  Object.keys(expandedSections.value).forEach(key => {
+    expandedSections.value[key] = false;
+  });
+  expandedPaths.value.clear();
+};
+
+// Initialize on mount
 onMounted(() => {
-  console.log('Debug panel mounted');
-  // Default to false, only enable if explicitly set to 'true' in localStorage
   const savedState = localStorage.getItem('debugPanelVisible');
-  console.log('Saved debug state:', savedState);
   isDebugVisible.value = savedState === 'true';
   store.setDebugMode(isDebugVisible.value);
 });
-
-const formatDate = (dateString) => {
-  if (!dateString) return 'Not set';
-  return new Date(dateString).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric'
-  });
-};
-
-const formatFocusArea = (key) => {
-  const labels = {
-    collaborative: 'Collaborative Learning',
-    presentations: 'Presentations',
-    classDiscussions: 'Class Discussions',
-    research: 'Research Skills'
-  };
-  return labels[key] || key;
-};
-
-const handleTestRequest = async () => {
-  if (isGenerating.value) return;
-  
-  isGenerating.value = true;
-  debugError.value = null;
-  lastResponse.value = null;
-  
-  try {
-    // Create test data using current form state
-    const data = {
-      // Basic Information
-      subject: store.formData.subject,
-      studentAgeRange: store.formData.studentAgeRange,
-      numberOfStudents: store.formData.numberOfStudents,
-      
-      // Schedule Information
-      startDate: store.formData.startDate,
-      endDate: store.formData.endDate,
-      lessonDuration: store.formData.lessonDuration,
-      lessonFrequency: store.formData.lessonFrequency
-    };
-    
-    const payload = createEmptyRequest();
-    Object.assign(payload, data);
-    lastRequestData.value = JSON.stringify(payload, null, 2);
-    const response = await apiService.testRequest(data);
-    lastResponse.value = JSON.stringify(response.data, null, 2);
-    
-    requestSuccess.value = true;
-    setTimeout(() => {
-      requestSuccess.value = false;
-    }, 3000);
-  } catch (err) {
-    debugError.value = err.message;
-    console.error('API test failed:', err);
-  } finally {
-    isGenerating.value = false;
-  }
-};
-
-const debugInfo = (state) => ({
-  currentStep: state.currentStep,
-  hasAttemptedNext: state.hasAttemptedNext,
-  canProceed: state.currentStep === 0 ? 
-    !!(state.formData.studentAgeRange && 
-       state.formData.numberOfStudents &&
-       state.formData.startDate && 
-       state.formData.endDate && 
-       state.formData.lessonDuration &&
-       state.formData.lessonFrequency) : true,
-  studentAgeRange: state.formData.studentAgeRange,
-  numberOfStudents: state.formData.numberOfStudents,
-  startDate: formatDate(state.formData.startDate),
-  endDate: formatDate(state.formData.endDate),
-  lessonDuration: state.formData.lessonDuration + ' minutes',
-  lessonFrequency: state.formData.lessonFrequency,
-  holidays: state.formData.holidays.length + ' holidays'
-});
-
-// Add new computed property and methods
-const getFieldStatus = (path) => {
-  if (path.includes('.')) {
-    const [parent, child] = path.split('.');
-    return store.formFieldStatus[parent]?.[child] || { isComplete: false };
-  }
-  return store.formFieldStatus[path] || { isComplete: false };
-};
 </script>
 
 <style scoped>
-/* Custom scrollbar styles */
-.overflow-y-auto {
-  scrollbar-width: thin;
-  scrollbar-color: #CBD5E0 #EDF2F7;
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
 }
 
-.overflow-y-auto::-webkit-scrollbar {
-  width: 6px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-track {
-  background: #EDF2F7;
-  border-radius: 3px;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb {
-  background-color: #CBD5E0;
-  border-radius: 3px;
-  border: 2px solid #EDF2F7;
-}
-
-.overflow-y-auto::-webkit-scrollbar-thumb:hover {
-  background-color: #A0AEC0;
-}
-
-/* Ensure sticky header works properly */
-.sticky {
-  position: sticky;
-  background-color: #F9FAFB;
-  margin-left: -1rem;
-  margin-right: -1rem;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  margin-top: -1rem;
-  padding-top: 1rem;
-}
-
-.animate-scale-in {
-  animation: scaleIn 0.3s ease-out;
-}
-
-@keyframes scaleIn {
+@keyframes fadeIn {
   from {
-    transform: scale(0);
     opacity: 0;
+    transform: translateY(5px);
   }
   to {
-    transform: scale(1);
     opacity: 1;
+    transform: translateY(0);
   }
 }
 </style> 

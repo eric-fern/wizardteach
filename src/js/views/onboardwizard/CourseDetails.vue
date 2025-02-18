@@ -1,9 +1,20 @@
+/**
+ * Course Details Step
+ * 
+ * Second step in the onboarding wizard that collects:
+ * - Student information (age range, class size)
+ * - Course schedule (duration, dates)
+ * - Resource availability (devices, field trips, etc.)
+ * 
+ * Uses BaseWizardStep for navigation and layout consistency.
+ */
 <template>
   <BaseWizardStep :isValid="isValid" @next="handleNext">
     <!-- Students Section -->
     <div class="mb-8">
       <h2 class="text-xl font-bold text-gray-900 mb-4">Students</h2>
       <div class="grid grid-cols-2 gap-4">
+        <!-- Age Range Selection -->
         <div>
           <div class="flex items-center group relative mb-1">
             <label class="block text-sm font-medium text-gray-700">Age Range</label>
@@ -27,6 +38,8 @@
             </option>
           </select>
         </div>
+
+        <!-- Class Size Input -->
         <div>
           <div class="flex items-center group relative mb-1">
             <label class="block text-sm font-medium text-gray-700">Number of Students</label>
@@ -52,14 +65,13 @@
       </div>
     </div>
 
-    <!-- Basic Course Information -->
+    <!-- Course Information Section -->
     <div class="mb-8">
       <h2 class="text-xl font-bold text-gray-900 mb-4">Course Information</h2>
-      <!-- Class Duration and Scheduling -->
       <div class="grid grid-cols-2 gap-4">
-        <!-- Left Column: Duration and Dates -->
+        <!-- Left Column: Resources and Timing -->
         <div class="space-y-4">
-          <!-- Checkboxes -->
+          <!-- Resource Availability Checkboxes -->
           <div class="flex flex-col space-y-2">
             <label class="inline-flex items-center group relative">
               <input 
@@ -195,7 +207,7 @@
           </div>
         </div>
 
-        <!-- Right Column: Scheduling -->
+        <!-- Right Column: AI-Enabled Scheduling -->
         <div class="flex flex-col h-full">
           <TextBoxWithAITag
             label="Lesson Scheduling"
@@ -213,14 +225,22 @@
 
 <script setup>
 import { computed } from 'vue';
-import { useRouter } from 'vue-router';
 import BaseWizardStep from './BaseWizardStep.vue';
 import { useStore } from '../../stores/store';
 import TextBoxWithAITag from '../../components/shared/TextBoxWithAITag.vue';
 
-const router = useRouter();
 const store = useStore();
 
+/**
+ * Validates all required fields for the course details step
+ * Required fields:
+ * - studentAgeRange
+ * - numberOfStudents
+ * - lessonDuration
+ * - lessonFrequency
+ * - startDate
+ * - endDate
+ */
 const isValid = computed(() => {
   return (
     store.formData.studentAgeRange !== '' &&
@@ -232,10 +252,13 @@ const isValid = computed(() => {
   );
 });
 
+/**
+ * Handles the next step transition
+ * Navigation is handled by BaseWizardStep
+ */
 const handleNext = () => {
-  if (isValid.value) {
-    router.push('/onboard/standards');
-  }
+  // No specific logic needed for this step
+  console.log('Course details completed');
 };
 </script>
 

@@ -1,7 +1,15 @@
+/**
+ * Progress Indicator Component
+ * 
+ * Displays completed form fields in a visually appealing oval layout.
+ * Automatically updates based on the Pinia store state.
+ * Uses different colors to distinguish between basic info and standards.
+ */
 <template>
   <div class="mb-8 border-2 border-dashed border-blue-300 rounded-xl p-4 bg-blue-50/50">
     <div class="flex flex-wrap gap-2">
       <template v-for="(field, key) in displayFields" :key="key">
+        <!-- Individual Field Indicator -->
         <div v-if="field.value" 
           class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
           :class="field.type === 'standards' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'"
@@ -19,6 +27,10 @@ import { useStore } from '../../stores/store';
 
 const store = useStore();
 
+/**
+ * Formats a date string into a human-readable format
+ * Used for displaying course start/end dates
+ */
 const formatDate = (dateString) => {
   if (!dateString) return '';
   return new Date(dateString).toLocaleDateString('en-US', {
@@ -28,11 +40,18 @@ const formatDate = (dateString) => {
   });
 };
 
+/**
+ * Computed property that generates the display fields based on store state
+ * Each field is an object with:
+ * - type: The category of the field (basic, duration, standards)
+ * - value: Whether the field should be shown
+ * - label: The formatted text to display
+ */
 const displayFields = computed(() => {
   const fields = [];
   const { formData } = store;
 
-  // Basic Info
+  // Basic Info Fields
   if (formData.subject) {
     fields.push({
       type: 'basic',
@@ -57,7 +76,7 @@ const displayFields = computed(() => {
     });
   }
 
-  // Course Duration
+  // Course Duration Fields
   if (formData.startDate && formData.endDate) {
     fields.push({
       type: 'duration',
@@ -66,7 +85,7 @@ const displayFields = computed(() => {
     });
   }
 
-  // Lesson Duration
+  // Lesson Duration Field
   if (formData.lessonDuration) {
     fields.push({
       type: 'duration',
@@ -75,13 +94,14 @@ const displayFields = computed(() => {
     });
   }
 
-  // Standards
-  if (formData.standards.type) {
+  // Standards Selection Field
+  // Uses selectedType to match the store structure
+  if (formData.standards.selectedType) {
     let standardsLabel = '';
-    if (formData.standards.type === 'state' && formData.standards.state) {
+    if (formData.standards.selectedType === 'state' && formData.standards.state) {
       standardsLabel = `${store.getStateName(formData.standards.state)} State Standards`;
     } else {
-      standardsLabel = store.getStandardsTypeLabel(formData.standards.type);
+      standardsLabel = store.getStandardsTypeLabel(formData.standards.selectedType);
     }
     fields.push({
       type: 'standards',

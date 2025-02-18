@@ -1,257 +1,137 @@
 # New file content
 <template>
-  <BaseWizardStep :isValid="isValid">
+  <BaseWizardStep
+    title="Choose Your Standards"
+    subtitle="Select the educational standards you'll be following or upload your own"
+    :is-valid="isValid"
+    @next="handleNext"
+    @prev="handlePrev"
+  >
+    <!-- Standard Selection -->
     <div class="space-y-6">
-      <div>
-        <h2 class="text-xl font-bold text-gray-900 mb-4">Curriculum Standards</h2>
-        
-        <!-- Standards Type Selection -->
-        <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-4">Select Standards Type</label>
-          <div class="space-y-2">
-            <!-- National Standards -->
-            <div class="mb-4">
-              <h3 class="text-sm font-medium text-gray-700 mb-2">National & International Standards</h3>
-              <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                <input 
-                  type="radio" 
-                  v-model="store.formData.standards.type"
-                  value="common-core"
-                  class="h-4 w-4 text-blue-500 border-gray-300 focus:ring-blue-500"
-                >
-                <div class="ml-3">
-                  <span class="text-sm font-medium text-gray-900">Common Core Standards</span>
-                  <p class="text-sm text-gray-500">Nationally recognized K-12 academic standards</p>
-                </div>
-              </label>
-
-              <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer mt-2">
-                <input 
-                  type="radio" 
-                  v-model="store.formData.standards.type"
-                  value="ap"
-                  @change="handleAPorIBSelection"
-                  class="h-4 w-4 text-blue-500 border-gray-300 focus:ring-blue-500"
-                >
-                <div class="ml-3">
-                  <span class="text-sm font-medium text-gray-900">Advanced Placement (AP)</span>
-                  <p class="text-sm text-gray-500">College Board AP curriculum standards for college-level courses</p>
-                </div>
-              </label>
-
-              <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer mt-2">
-                <input 
-                  type="radio" 
-                  v-model="store.formData.standards.type"
-                  value="ib"
-                  @change="handleAPorIBSelection"
-                  class="h-4 w-4 text-blue-500 border-gray-300 focus:ring-blue-500"
-                >
-                <div class="ml-3">
-                  <span class="text-sm font-medium text-gray-900">International Baccalaureate (IB)</span>
-                  <p class="text-sm text-gray-500">International education framework and standards</p>
-                </div>
-              </label>
-            </div>
-
-            <!-- State Standards -->
-            <div class="pt-4 border-t">
-              <h3 class="text-sm font-medium text-gray-700 mb-2">State-Specific Standards</h3>
-              <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                <input 
-                  type="radio" 
-                  v-model="store.formData.standards.type"
-                  value="state"
-                  class="h-4 w-4 text-blue-500 border-gray-300 focus:ring-blue-500"
-                >
-                <div class="ml-3">
-                  <span class="text-sm font-medium text-gray-900">State Standards</span>
-                  <p class="text-sm text-gray-500">Standards specific to your state's requirements</p>
-                </div>
-              </label>
-
-              <!-- State Selection (only shown when state standards are selected) -->
-              <div v-if="store.formData.standards.type === 'state'" 
-                class="mt-3 ml-7 p-4 bg-gray-50 rounded-lg border border-gray-200"
-              >
-                <label class="block text-sm font-medium text-gray-700 mb-2">Select Your State</label>
-                <select 
-                  v-model="store.formData.standards.state"
-                  class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 border-gray-300"
-                >
-                  <option value="">Choose a state</option>
-                  <option v-for="state in store.states" :key="state.code" :value="state.code">
-                    {{ state.name }}
-                  </option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Student Accommodations -->
-        <div class="mb-6 pt-4 border-t">
-          <h3 class="text-sm font-medium text-gray-700 mb-4">Student Accommodations</h3>
-          <div class="bg-gray-50 p-4 rounded-lg">
-            <div class="flex space-x-6">
-              <label class="inline-flex items-center group relative">
-                <input 
-                  type="checkbox" 
-                  v-model="store.formData.studentComposition.esl"
-                  class="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
-                >
-                <span class="ml-2 text-sm text-gray-700">ESL</span>
+      <div class="grid grid-cols-1 gap-6">
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h4 class="text-lg font-medium text-gray-900 mb-4">Standard Type</h4>
+          <div class="space-y-4">
+            <label class="flex items-center space-x-3">
+              <input
+                type="radio"
+                v-model="selectedType"
+                @change="store.setStandardsType(selectedType)"
+                value="common-core"
+                class="h-4 w-4 text-blue-600"
+              />
+              <span class="text-gray-700">{{ store.standardsConfig.types['common-core'].label }}</span>
+            </label>
+            <label class="flex items-center space-x-3">
+              <input
+                type="radio"
+                v-model="selectedType"
+                @change="store.setStandardsType(selectedType)"
+                value="state"
+                class="h-4 w-4 text-blue-600"
+              />
+              <span class="text-gray-700">{{ store.standardsConfig.types['state'].label }}</span>
+            </label>
+            <label class="flex items-center space-x-3 group relative">
+              <input
+                type="radio"
+                v-model="selectedType"
+                @change="store.setStandardsType(selectedType)"
+                value="custom"
+                class="h-4 w-4 text-blue-600"
+              />
+              <span class="text-gray-700">{{ store.standardsConfig.types['custom'].label }}</span>
+              <div class="flex items-center">
+                <span class="ml-2 text-sm text-blue-500 font-medium">AI-Enabled ✨</span>
                 <button class="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </button>
-                <div class="invisible group-hover:visible absolute bottom-full left-0 mb-2 w-48 p-2 bg-gray-900 text-white text-xs rounded shadow-lg">
-                  English as Second Language learners - Materials will include language support
+                <div class="invisible group-hover:visible absolute bottom-full left-0 mb-2 w-80 p-2 bg-gray-900 text-white text-xs rounded shadow-lg z-10">
+                  Upload any PDF document - whether it's a textbook, mechanic's manual, or custom standards document. Our AI can process and integrate any document into your curriculum planning.
                 </div>
-              </label>
-              <label class="inline-flex items-center group relative">
-                <input 
-                  type="checkbox" 
-                  v-model="store.formData.studentComposition.iep"
-                  class="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
-                >
-                <span class="ml-2 text-sm text-gray-700">IEP</span>
-                <button class="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </button>
-                <div class="invisible group-hover:visible absolute bottom-full left-0 mb-2 w-48 p-2 bg-gray-900 text-white text-xs rounded shadow-lg">
-                  Individualized Education Program - Includes modified content and accommodations
-                </div>
-              </label>
-              <label class="inline-flex items-center group relative">
-                <input 
-                  type="checkbox" 
-                  v-model="store.formData.studentComposition.gifted"
-                  class="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
-                >
-                <span class="ml-2 text-sm text-gray-700">Gifted</span>
-                <button class="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </button>
-                <div class="invisible group-hover:visible absolute bottom-full left-0 mb-2 w-48 p-2 bg-gray-900 text-white text-xs rounded shadow-lg">
-                  Advanced learners - Includes enrichment and challenging content
-                </div>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <!-- Test Prep -->
-        <div class="mb-6 pt-4 border-t">
-          <h3 class="text-sm font-medium text-gray-700 mb-4">Test Preparation Focus</h3>
-          <div class="bg-gray-50 p-4 rounded-lg">
-            <div class="grid grid-cols-2 gap-4">
-              <label class="inline-flex items-center">
-                <input 
-                  type="checkbox" 
-                  v-model="store.formData.testPrep.ap"
-                  :disabled="store.formData.standards.type === 'ap'"
-                  class="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
-                >
-                <span class="ml-2 text-sm text-gray-700">AP Exam Prep</span>
-              </label>
-              <label class="inline-flex items-center">
-                <input 
-                  type="checkbox" 
-                  v-model="store.formData.testPrep.ib"
-                  :disabled="store.formData.standards.type === 'ib'"
-                  class="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
-                >
-                <span class="ml-2 text-sm text-gray-700">IB Exam Prep</span>
-              </label>
-              <label class="inline-flex items-center">
-                <input 
-                  type="checkbox" 
-                  v-model="store.formData.testPrep.sat"
-                  class="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
-                >
-                <span class="ml-2 text-sm text-gray-700">SAT Prep</span>
-              </label>
-              <label class="inline-flex items-center">
-                <input 
-                  type="checkbox" 
-                  v-model="store.formData.testPrep.act"
-                  class="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
-                >
-                <span class="ml-2 text-sm text-gray-700">ACT Prep</span>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <!-- Standards Preview -->
-        <div class="bg-gray-50 rounded-lg p-4">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="text-sm font-medium text-gray-900">Selected Standards Preview</h3>
-            <span class="text-xs text-gray-500">Full standards list will be included in generated materials</span>
-          </div>
-          <div class="space-y-2">
-            <div v-if="store.formData.standards.type" class="p-3 bg-white rounded-lg border border-gray-200">
-              <div class="text-sm text-gray-900">
-                {{ getStandardsTypeLabel(store.formData.standards.type) }}
-                <span v-if="store.formData.standards.type === 'state' && store.formData.standards.state" class="ml-2 text-gray-500">
-                  - {{ getStateName(store.formData.standards.state) }}
-                </span>
               </div>
-              <div class="mt-2 text-xs text-gray-500">
-                All materials will be aligned with {{ getStandardsTypeLabel(store.formData.standards.type) }}
-                {{ store.formData.standards.type === 'state' && store.formData.standards.state ? 'for ' + getStateName(store.formData.standards.state) : '' }}
-              </div>
-            </div>
+            </label>
           </div>
         </div>
+      </div>
+
+      <!-- State Selection (shown when state standards selected) -->
+      <div v-if="selectedType === 'state'" class="animate-fade-in">
+        <div class="bg-white rounded-lg shadow-sm p-6">
+          <h4 class="text-lg font-medium text-gray-900 mb-4">Select State</h4>
+          <select
+            v-model="selectedState"
+            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+          >
+            <option value="">Select a state...</option>
+            <option v-for="state in states" :key="state.code" :value="state.code">
+              {{ state.name }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Custom Standards Upload (shown when custom standards selected) -->
+      <div v-if="selectedType === 'custom'" class="animate-fade-in">
+        <UploadAndHoldFileWithinPinia />
+        <p class="mt-4 text-sm text-gray-500 text-center">
+          {{ store.standardsConfig.types['custom'].description }}
+        </p>
       </div>
     </div>
   </BaseWizardStep>
 </template>
 
 <script setup>
-import { computed } from 'vue';
-import BaseWizardStep from './BaseWizardStep.vue';
-import { useStore } from '../../stores/store';
+import { ref, computed, onMounted, watch } from 'vue'
+import { useStore } from '../../stores/store'
+import BaseWizardStep from './BaseWizardStep.vue'
+import UploadAndHoldFileWithinPinia from '../../components/shared/UploadAndHoldFileWithinPinia.vue'
 
-const store = useStore();
+const store = useStore()
+const selectedType = ref(store.formData.standards.selectedType)
+const selectedState = ref(store.formData.standards.state)
 
-const isValid = computed(() => {
-  return (
-    store.formData.standards.type !== '' &&
-    (store.formData.standards.type !== 'state' || store.formData.standards.state !== '')
-  );
-});
+// Initialize from store on mount
+onMounted(() => {
+  selectedType.value = store.formData.standards.selectedType
+  selectedState.value = store.formData.standards.state
+})
 
-const getStandardsTypeLabel = (type) => {
-  const labels = {
-    'common-core': 'Common Core Standards',
-    'state': 'State Standards',
-    'ib': 'International Baccalaureate',
-    'ap': 'Advanced Placement'
-  };
-  return labels[type] || type;
-};
+const states = store.standardsConfig.states
 
-const getStateName = (code) => {
-  const state = store.states.find(s => s.code === code);
-  return state ? state.name : code;
-};
+// Use the store's validation
+const isValid = computed(() => store.isStandardsStepValid)
 
-const handleAPorIBSelection = () => {
-  // If AP is selected as standards type, automatically enable AP test prep
-  if (store.formData.standards.type === 'ap') {
-    store.formData.testPrep.ap = true;
+const handleNext = () => {
+  // Store is already updated through the v-model and @change handlers
+  if (selectedType.value === 'custom') {
+    store.setPdfType('standards')
   }
-  // If IB is selected as standards type, automatically enable IB test prep
-  if (store.formData.standards.type === 'ib') {
-    store.formData.testPrep.ib = true;
+}
+
+// Watch for state selection
+watch(selectedState, (newState) => {
+  store.setStateStandard(newState)
+})
+</script>
+
+<style scoped>
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
   }
-};
-</script> 
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style> 
