@@ -25,6 +25,11 @@ Another idea is auto grader
 
 ## System Architecture
 
+- We have a lot of components in components/shared Always check there before building from scratch.
+- We have a lot of views in src/js/views Always check there before building from scratch.
+- When you make changes make sure to check routes and file names across our project.
+
+
 ### Overall System
 ```mermaid
 graph LR
@@ -58,6 +63,7 @@ graph TD
     %% State Management
     PINIA[Pinia Store] --> |State| APP
     PINIA --> |Local Storage| PERSIST[(Persistence)]
+    PINIA --> |Debug State| DEBUG[Debug Panel]
     
     %% Shared Components
     COMPONENTS[Shared Components] --> |Used By| VIEWS
@@ -100,10 +106,27 @@ graph LR
 - Local state persistence
 - Limited preview capabilities
 - Account creation gate before generation
+- Centralized debug system
+  - Navigation state tracking
+  - Form validation monitoring
+  - Field completion status
 
 ```typescript
 // Local Setup Store (Browser Storage)
 interface LocalSetupStore {
+  // Debug State
+  debug: {
+    isEnabled: boolean;
+    navigationState: {
+      currentStep: number;
+      steps: string[];
+    };
+    formValidation: {
+      isValid: boolean;
+      requiredFields: string[];
+    };
+  };
+
   basicInfo: {
     subject: string;
     studentAgeRange: string;
@@ -123,11 +146,21 @@ interface LocalSetupStore {
   };
 }
 
-// Generation Gate
-interface GenerationFlow {
-  hasAccount: boolean;
-  canGenerate: boolean;
-  requiresSignup: boolean;
+// Form Field Status
+interface FormFieldStatus {
+  value: any;
+  isComplete: boolean;
+}
+
+// Debug Panel Configuration
+interface DebugPanelConfig {
+  sections: {
+    navigation: boolean;
+    validation: boolean;
+    formStatus: boolean;
+  };
+  persistence: boolean;
+  eventLogging: boolean;
 }
 ```
 
@@ -205,15 +238,20 @@ interface CollaborationState {
 3. Build account creation gate
 4. Design server data migration
 5. Establish wizard template structure
+6. Implement centralized debugging
+   - Navigation state tracking
+   - Form validation monitoring
+   - Field completion status
 
 ### Next Steps
 1. Implement server-side storage
 2. Add rich customization features
 3. Develop additional wizard types
-   - Worksheet generator
-   - PowerPoint generator
-   - Flashcard generator
 4. Enable premium features
+5. Consider debug panel extensibility
+   - Plugin system for new features
+   - Debug event logging
+   - Persistence configuration
 
 ## User Experience Flow
 1. **Phase 1: Local Setup**

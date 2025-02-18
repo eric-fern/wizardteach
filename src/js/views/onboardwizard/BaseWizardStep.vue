@@ -79,14 +79,13 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
 import { useStore } from '../../stores/store';
 import BlueDottedOvalShowsCompletedFormFields from '../../components/shared/BlueDottedOvalShowsCompletedFormFields.vue';
 
 const store = useStore();
 const emit = defineEmits(['next']);
 
-defineProps({
+const props = defineProps({
   title: {
     type: String,
     default: ''
@@ -100,6 +99,10 @@ defineProps({
     default: () => ({})
   },
   isValid: {
+    type: Boolean,
+    default: false
+  },
+  hidePrevious: {
     type: Boolean,
     default: false
   }

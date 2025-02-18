@@ -1,58 +1,51 @@
 import { defineStore } from 'pinia';
+import router from '../router';  // Direct import instead of useRouter hook
 
+/**
+ * Main application store
+ * 
+ * Handles:
+ * - Wizard navigation state
+ * - Form data management
+ * - Debug mode and validation
+ * - Reference data for dropdowns/labels
+ */
 export const useStore = defineStore('store', {
   state: () => ({
-    // UI State
-    currentStep: 0,
-    isAddingHoliday: false,
-    hasAttemptedNext: false,
-    steps: ['Course Details', 'Standards', 'Review'],
-    isDebugMode: false,
+    // UI State Management
+    currentStep: 0,  // Tracks current position in wizard flow
     
+    /**
+     * Wizard Flow Steps
+     * 0: Entry - Initial subject selection
+     * 1: Course Details - Age range, duration, dates
+     * 2: Standards - Educational standards selection
+     * 3: Review - Final review before generation
+     */
+    steps: ['Entry', 'Course Details', 'Standards', 'Review'],
+    
+    isDebugMode: false,  // Controls debug panel visibility
+    
+    // Form Data Management
     formData: {
       // Basic Info
       subject: '',
       studentAgeRange: '',
-      numberOfStudents: '',
-      
-      // Schedule
+      lessonDuration: '',
       startDate: '',
       endDate: '',
-      lessonDuration: '',
-      lessonFrequency: '',
       
-      // Resource Availability
-      hasDevices: false,
-      hasFieldTrips: false,
-      hasProjector: false,
-      hasLab: false,
-      
-      // Checkboxes
-      one: false,
-      two: false,
-      three: false,
-      four: false,
-      
+      // Standards & Requirements
+      standards: {
+        type: '', // 'common-core', 'state', 'ib', 'ap'
+        state: '', // if type is 'state'
+      },
+
       // Student Composition
       studentComposition: {
         esl: false,
         iep: false,
         gifted: false
-      },
-      
-      // Focus Areas
-      focusAreas: {
-        collaborative: false,
-        presentations: false,
-        classDiscussions: false,
-        research: false
-      },
-      
-      // Standards
-      standards: {
-        type: '', // 'common-core', 'state', 'ib', 'ap'
-        state: '', // if type is 'state'
-        specificStandards: [] // selected standards
       },
 
       // Test Prep
@@ -64,14 +57,7 @@ export const useStore = defineStore('store', {
       }
     },
 
-    // Holiday Form State
-    newHoliday: {
-      title: '',
-      startDate: '',
-      endDate: ''
-    },
-
-    // Reference Data
+    // Reference Data (needed for dropdowns/labels)
     ageOptions: [
       { value: '6-7', label: '6-7 years' },
       { value: '8-9', label: '8-9 years' },
@@ -83,6 +69,18 @@ export const useStore = defineStore('store', {
       { value: 'college', label: 'College/Professionals' }
     ],
     
+    durations: {
+      '15': '15 minutes',
+      '30': '30 minutes',
+      '45': '45 minutes',
+      '60': '1 hour',
+      '75': '1 hour 15 minutes',
+      '90': '1 hour 30 minutes',
+      '105': '1 hour 45 minutes',
+      '120': '2 hours',
+      '240': '4 hours'
+    },
+
     states: [
       { code: 'AL', name: 'Alabama' },
       { code: 'AK', name: 'Alaska' },
@@ -94,85 +92,92 @@ export const useStore = defineStore('store', {
       'state': 'State Standards',
       'ib': 'International Baccalaureate',
       'ap': 'Advanced Placement'
-    },
-    
-    durations: {
-      '15': '15 minutes',
-      '30': '30 minutes',
-      '45': '45 minutes',
-      '60': '1 hour',
-      '75': '1 hour 15 minutes',
-      '90': '1 hour 30 minutes',
-      '105': '1 hour 45 minutes',
-      '120': '2 hours',
-      '240': '4 hours'
     }
   }),
 
   getters: {
-    // Debug Information
-    debugInfo: (state) => ({
-      currentStep: state.currentStep,
-      hasAttemptedNext: state.hasAttemptedNext,
-      canProceed: state.currentStep === 0 ? 
-        !!(state.formData.studentAgeRange && 
-           state.formData.numberOfStudents &&
-           state.formData.startDate && 
-           state.formData.endDate && 
-           state.formData.lessonDuration &&
-           state.formData.lessonFrequency?.trim()) : true,
-      studentAgeRange: state.formData.studentAgeRange,
-      numberOfStudents: state.formData.numberOfStudents,
-      startDate: formatDate(state.formData.startDate),
-      endDate: formatDate(state.formData.endDate),
-      lessonDuration: state.formData.lessonDuration + ' minutes',
-      lessonFrequency: state.formData.lessonFrequency
-    }),
+    /**
+     * Computes the status of all form fields for debugging
+     * Returns an object with field values and completion status
+     */
+    formFieldStatus: (state) => {
+      const status = {};
+      
+      Object.entries(state.formData).forEach(([key, value]) => {
+        if (typeof value === 'object' && value !== null) {
+          status[key] = Object.entries(value).reduce((acc, [subKey, subValue]) => {
+            acc[subKey] = {
+              value: subValue,
+              isComplete: !!subValue
+            };
+            return acc;
+          }, {});
+        } else {
+          status[key] = {
+            value,
+            isComplete: !!value
+          };
+        }
+      });
+      
+      return status;
+    },
 
-    canProceed: (state) => {
-      // In debug mode, always allow progression
-      if (state.isDebugMode) return true;
-
+    /**
+     * Validates the current step based on required fields
+     * Returns validation status and list of required fields
+     * 
+     * Validation Rules by Step:
+     * 0 (Entry): Requires subject selection
+     * 1 (Course Details): Requires age range, duration, start/end dates
+     * 2 (Standards): Requires standards type and state if applicable
+     * 3 (Review): No validation, always valid
+     */
+    currentStepValidation: (state) => {
       switch (state.currentStep) {
-        case 0: // Course Details
-          return !!(
-            state.formData.studentAgeRange &&
-            state.formData.numberOfStudents &&
-            state.formData.startDate &&
-            state.formData.endDate &&
-            state.formData.lessonDuration &&
-            state.formData.lessonFrequency?.trim()
-          );
+        case 0: // Entry
+          return {
+            isValid: !!state.formData.subject,
+            requiredFields: ['subject']
+          };
 
-        case 1: // Standards
-          return !!(
-            state.formData.standards.type &&
-            (state.formData.standards.type !== 'state' || state.formData.standards.state)
-          );
+        case 1: // Course Details
+          return {
+            isValid: !!(
+              state.formData.studentAgeRange &&
+              state.formData.lessonDuration &&
+              state.formData.startDate &&
+              state.formData.endDate
+            ),
+            requiredFields: [
+              'studentAgeRange',
+              'lessonDuration',
+              'startDate',
+              'endDate'
+            ]
+          };
 
-        case 2: // Review
-          return true;
+        case 2: // Standards
+          return {
+            isValid: !!(
+              state.formData.standards.type &&
+              (state.formData.standards.type !== 'state' || state.formData.standards.state)
+            ),
+            requiredFields: ['standards.type', 'standards.state']
+          };
+
+        case 3: // Review
+          return {
+            isValid: true,
+            requiredFields: []
+          };
 
         default:
-          return false;
+          return {
+            isValid: false,
+            requiredFields: []
+          };
       }
-    },
-
-    getSelectedFocusAreas: (state) => {
-      const areas = [];
-      if (state.formData.focusAreas.collaborative) areas.push('Collaborative Learning');
-      if (state.formData.focusAreas.presentations) areas.push('Presentations');
-      if (state.formData.focusAreas.classDiscussions) areas.push('Class Discussions');
-      if (state.formData.focusAreas.research) areas.push('Research Skills');
-      return areas;
-    },
-
-    getSelectedAccommodations: (state) => {
-      const accommodations = [];
-      if (state.formData.studentComposition.esl) accommodations.push('ESL');
-      if (state.formData.studentComposition.iep) accommodations.push('IEP');
-      if (state.formData.studentComposition.gifted) accommodations.push('Gifted');
-      return accommodations;
     },
 
     // Helper getters for formatting
@@ -192,169 +197,95 @@ export const useStore = defineStore('store', {
 
     formatDuration: (state) => (minutes) => {
       return state.durations[minutes] || `${minutes} minutes`;
-    },
-
-    canAddHoliday: (state) => {
-      if (!state.newHoliday.title || 
-          !state.newHoliday.startDate || 
-          !state.newHoliday.endDate) {
-        return false;
-      }
-
-      const start = new Date(state.newHoliday.startDate);
-      const end = new Date(state.newHoliday.endDate);
-      
-      // Also check if holiday is within course dates
-      const courseStart = new Date(state.formData.startDate);
-      const courseEnd = new Date(state.formData.endDate);
-      
-      return !isNaN(start) && !isNaN(end) && 
-             start <= end &&
-             start >= courseStart &&
-             end <= courseEnd;
-    },
-    
-    formatHolidayDate: () => (dateString) => {
-      if (!dateString) return '';
-      return new Date(dateString).toLocaleDateString('en-US', {
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric'
-      });
     }
   },
 
   actions: {
-    // Step Management
+    /**
+     * Navigation Actions
+     * Uses router for navigation to maintain sync between
+     * router state and store state
+     * 
+     * Navigation Flow:
+     * / (Entry) -> /onboard/course-details -> /onboard/standards -> /create
+     * 
+     * Each navigation updates both the router and store state to maintain
+     * a single source of truth for the current step.
+     */
     nextStep() {
+      console.log('Next step called, current step:', this.currentStep);
       if (this.currentStep < this.steps.length - 1) {
-        this.currentStep++;
+        const nextStep = this.currentStep + 1;
+        switch(nextStep) {
+          case 1:
+            router.push('/onboard/course-details');  // From Entry to Course Details
+            break;
+          case 2:
+            router.push('/onboard/standards');       // From Course Details to Standards
+            break;
+          case 3:
+            router.push('/create');                  // From Standards to Review
+            break;
+        }
       }
     },
 
     prevStep() {
+      console.log('Prev step called, current step:', this.currentStep);
       if (this.currentStep > 0) {
-        this.currentStep--;
+        const prevStep = this.currentStep - 1;
+        console.log('Going to previous step:', prevStep);
+        switch(prevStep) {
+          case 0:
+            router.push('/');                        // Back to Entry
+            break;
+          case 1:
+            router.push('/onboard/course-details');  // Back to Course Details
+            break;
+          case 2:
+            router.push('/onboard/standards');       // Back to Standards
+            break;
+        }
       }
     },
 
+    /**
+     * Debug Mode Management
+     * Toggles visibility of the debug panel and enables debug features
+     */
     setDebugMode(enabled) {
       this.isDebugMode = enabled;
-      // Reset hasAttemptedNext when toggling debug mode
-      this.hasAttemptedNext = false;
-      // Clear any saved debug state if disabling
-      if (!enabled) {
-        localStorage.removeItem('debugPanelVisible');
+    },
+
+    /**
+     * Form Data Management
+     * Handles updates to nested and top-level form fields
+     * @param {string} path - Field path (e.g., 'subject' or 'standards.type')
+     * @param {any} value - New value to set
+     */
+    updateFormData(path, value) {
+      if (path.includes('.')) {
+        const [parent, child] = path.split('.');
+        this.formData[parent] = {
+          ...this.formData[parent],
+          [child]: value
+        };
+      } else {
+        this.formData[path] = value;
       }
     },
 
-    setStep(step) {
-      if (this.isDebugMode && step >= 0 && step < this.steps.length) {
-        this.currentStep = step;
-      }
-    },
-
-    // Holiday Management
-    startAddingHoliday() {
-      this.isAddingHoliday = true;
-    },
-
-    cancelAddingHoliday() {
-      this.isAddingHoliday = false;
-      this.newHoliday = {
-        title: '',
-        startDate: '',
-        endDate: ''
-      };
-    },
-
-    addHoliday() {
-      if (this.canAddHoliday) {
-        this.formData.holidays.push({...this.newHoliday});
-        this.cancelAddingHoliday();
-      }
-    },
-
-    updateNewHoliday(field, value) {
-      this.newHoliday[field] = value;
-    },
-
-    removeHoliday(index) {
-      this.formData.holidays.splice(index, 1);
-    },
-
-    // Form Management
-    setSubject(subject) {
-      this.formData.subject = subject;
-    },
-
-    updateFormData(field, value) {
-      this.formData[field] = value;
-    },
-
-    // This will be used when we're ready to send to the backend
-    prepareCurriculumData() {
-      const data = { ...this.formData };
-      
-      return {
-        ...data,
-        selectedFocusAreas: this.getSelectedFocusAreas,
-        selectedAccommodations: this.getSelectedAccommodations,
-        metadata: {
-          createdAt: new Date().toISOString(),
-          version: '1.0'
-        }
-      };
-    },
-
+    /**
+     * Standards Selection Handler
+     * Automatically updates test prep settings based on standards selection
+     */
     handleAPorIBSelection() {
-      // If AP is selected as standards type, automatically enable AP test prep
       if (this.formData.standards.type === 'ap') {
         this.formData.testPrep.ap = true;
       }
-      // If IB is selected as standards type, automatically enable IB test prep
       if (this.formData.standards.type === 'ib') {
         this.formData.testPrep.ib = true;
       }
-    },
-
-    resetForm() {
-      this.currentStep = 0;
-      this.formData = {
-        subject: '',
-        studentAgeRange: '',
-        numberOfStudents: '',
-        startDate: '',
-        endDate: '',
-        lessonDuration: '',
-        lessonFrequency: '',
-        hasDevices: false,
-        hasFieldTrips: false,
-        hasProjector: false,
-        hasLab: false,
-        studentComposition: {
-          esl: false,
-          iep: false,
-          gifted: false
-        },
-        focusAreas: {
-          collaborative: false,
-          presentations: false,
-          classDiscussions: false,
-          research: false
-        },
-        standards: {
-          type: '',
-          state: '',
-          specificStandards: []
-        },
-        testPrep: {
-          ap: false,
-          ib: false,
-          sat: false,
-          act: false
-        }
-      };
     }
   }
 }); 

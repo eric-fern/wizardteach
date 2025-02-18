@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- Debug Toggle -->
-    <div class="fixed bottom-4 right-4 z-50">
+    <div class="fixed bottom-4 right-4 z-[9999]">
       <label class="flex items-center cursor-pointer bg-white px-3 py-2 rounded-lg shadow-md">
         <input
           type="checkbox"
@@ -14,7 +14,7 @@
     </div>
 
     <!-- Debug Content -->
-    <div v-if="isDebugVisible" class="fixed bottom-20 right-4 z-40 w-[600px] max-h-[80vh] bg-gray-50 rounded-lg border border-gray-200 shadow-xl flex flex-col">
+    <div v-if="isDebugVisible" class="fixed bottom-20 right-4 z-[9998] w-[600px] max-h-[80vh] bg-gray-50 rounded-lg border border-gray-200 shadow-xl flex flex-col">
       <!-- Header (Fixed) -->
       <div class="p-4 border-b border-gray-200 bg-gray-50">
         <div class="flex justify-between items-center">
@@ -182,6 +182,29 @@
               <pre class="text-xs p-2 bg-gray-200 rounded overflow-auto max-h-32">{{ lastResponse }}</pre>
             </div>
           </div>
+
+          <!-- Validation Status -->
+          <div class="space-y-2 col-span-2">
+            <h5 class="text-xs font-semibold text-gray-700 border-b pb-1">Step Validation</h5>
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-600">Current Step Valid:</span>
+                <span :class="store.currentStepValidation.isValid ? 'text-green-600' : 'text-red-600'" class="text-xs font-medium">
+                  {{ store.currentStepValidation.isValid ? 'Yes' : 'No' }}
+                </span>
+              </div>
+              <div v-if="!store.currentStepValidation.isValid" class="text-xs text-gray-500">
+                Required fields:
+                <div class="mt-1 space-y-1">
+                  <div v-for="field in store.currentStepValidation.requiredFields" :key="field"
+                    :class="getFieldStatus(field).isComplete ? 'text-green-600' : 'text-red-600'"
+                  >
+                    {{ field }}: {{ getFieldStatus(field).isComplete ? 'Complete' : 'Incomplete' }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -203,6 +226,7 @@ const lastRequestData = ref(null);
 const lastResponse = ref(null);
 
 const toggleDebug = () => {
+  console.log('Debug toggled:', isDebugVisible.value);
   // Save debug visibility state to localStorage
   localStorage.setItem('debugPanelVisible', isDebugVisible.value);
   // Enable/disable debug mode in store
@@ -211,8 +235,10 @@ const toggleDebug = () => {
 
 // Load debug visibility state from localStorage on mount
 onMounted(() => {
+  console.log('Debug panel mounted');
   // Default to false, only enable if explicitly set to 'true' in localStorage
   const savedState = localStorage.getItem('debugPanelVisible');
+  console.log('Saved debug state:', savedState);
   isDebugVisible.value = savedState === 'true';
   store.setDebugMode(isDebugVisible.value);
 });
@@ -294,6 +320,15 @@ const debugInfo = (state) => ({
   lessonFrequency: state.formData.lessonFrequency,
   holidays: state.formData.holidays.length + ' holidays'
 });
+
+// Add new computed property and methods
+const getFieldStatus = (path) => {
+  if (path.includes('.')) {
+    const [parent, child] = path.split('.');
+    return store.formFieldStatus[parent]?.[child] || { isComplete: false };
+  }
+  return store.formFieldStatus[path] || { isComplete: false };
+};
 </script>
 
 <style scoped>
@@ -332,5 +367,20 @@ const debugInfo = (state) => ({
   padding-right: 1rem;
   margin-top: -1rem;
   padding-top: 1rem;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 </style> 
