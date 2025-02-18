@@ -31,7 +31,7 @@
  * }
  */
 <template>
-  <div class="fixed bottom-4 right-4 z-50">
+  <div class="fixed bottom-20 right-4 z-50">
     <!-- Wizard Icon -->
     <div class="relative w-12 h-12">
       <!-- Glow Effect -->

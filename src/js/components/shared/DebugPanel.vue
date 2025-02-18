@@ -2,29 +2,53 @@
   <div>
     <!-- Debug Toggle -->
     <div class="fixed bottom-4 right-4 z-[9999]">
-      <label class="flex items-center cursor-pointer bg-white px-3 py-2 rounded-lg shadow-md">
+      <label class="flex items-center cursor-pointer px-3 py-2 rounded-lg shadow-md transition-colors duration-200"
+             :style="{
+               backgroundColor: 'var(--bg-primary)',
+               color: 'var(--text-primary)',
+               borderColor: 'var(--border-color)',
+               border: '1px solid var(--border-color)'
+             }">
         <input
           type="checkbox"
           v-model="isDebugVisible"
           @change="toggleDebug"
-          class="form-checkbox h-4 w-4 text-blue-600 transition duration-150 ease-in-out"
+          class="form-checkbox h-4 w-4 transition duration-150 ease-in-out"
+          :style="{
+            color: 'var(--primary-500)',
+            borderColor: 'var(--border-color)'
+          }"
         >
-        <span class="ml-2 text-sm text-gray-600">Debug</span>
+        <span class="ml-2 text-sm" style="color: var(--text-secondary);">Debug</span>
       </label>
     </div>
 
     <!-- Debug Content -->
-    <div v-if="isDebugVisible" class="fixed bottom-20 right-4 z-[9998] w-[600px] max-h-[80vh] bg-gray-50 rounded-lg border border-gray-200 shadow-xl flex flex-col">
+    <div v-if="isDebugVisible" 
+         class="fixed bottom-20 right-4 z-[9998] w-[600px] max-h-[80vh] rounded-lg shadow-xl flex flex-col"
+         :style="{
+           backgroundColor: 'var(--bg-primary)',
+           borderColor: 'var(--border-color)',
+           border: '1px solid var(--border-color)'
+         }">
       <!-- Header -->
-      <div class="p-4 border-b border-gray-200 bg-gray-50">
+      <div class="p-4 border-b"
+           :style="{
+             backgroundColor: 'var(--bg-secondary)',
+             borderColor: 'var(--border-color)'
+           }">
         <div class="flex justify-between items-center">
           <div class="flex items-center gap-2">
-            <h4 class="text-sm font-medium text-gray-700">Debug Panel</h4>
-            <span class="text-xs text-blue-500">(synced with Pinia store)</span>
+            <h4 class="text-sm font-medium" style="color: var(--text-primary);">Debug Panel</h4>
+            <span class="text-xs" style="color: var(--primary-500);">(synced with Pinia store)</span>
           </div>
           <div class="flex items-center gap-2">
-            <button @click="expandAll" class="text-xs text-blue-600 hover:text-blue-700">Expand All</button>
-            <button @click="collapseAll" class="text-xs text-blue-600 hover:text-blue-700">Collapse All</button>
+            <button @click="expandAll" 
+                    class="text-xs transition-colors duration-200" 
+                    style="color: var(--primary-500);">Expand All</button>
+            <button @click="collapseAll" 
+                    class="text-xs transition-colors duration-200" 
+                    style="color: var(--primary-500);">Collapse All</button>
           </div>
         </div>
       </div>
@@ -35,20 +59,22 @@
           <!-- Navigation State -->
           <div class="space-y-2">
             <div class="flex items-center justify-between">
-              <h5 class="text-xs font-semibold text-gray-700">Navigation</h5>
-              <button @click="toggleSection('navigation')" class="text-xs text-gray-500">
+              <h5 class="text-xs font-semibold" style="color: var(--text-primary);">Navigation</h5>
+              <button @click="toggleSection('navigation')" 
+                      class="text-xs transition-colors duration-200" 
+                      style="color: var(--text-secondary);">
                 {{ expandedSections.navigation ? 'Collapse' : 'Expand' }}
               </button>
             </div>
             <div v-if="expandedSections.navigation" class="pl-4">
               <div class="text-xs">
                 <div class="flex items-center justify-between py-1">
-                  <span class="text-gray-600">Current Step:</span>
-                  <span class="text-gray-800">{{ store.currentStep }} ({{ store.steps[store.currentStep] }})</span>
+                  <span style="color: var(--text-secondary);">Current Step:</span>
+                  <span style="color: var(--text-primary);">{{ store.currentStep }} ({{ store.steps[store.currentStep] }})</span>
                 </div>
                 <div class="flex items-center justify-between py-1">
-                  <span class="text-gray-600">Total Steps:</span>
-                  <span class="text-gray-800">{{ store.steps.length }}</span>
+                  <span style="color: var(--text-secondary);">Total Steps:</span>
+                  <span style="color: var(--text-primary);">{{ store.steps.length }}</span>
                 </div>
               </div>
             </div>
@@ -57,8 +83,10 @@
           <!-- Form Data -->
           <div class="space-y-2">
             <div class="flex items-center justify-between">
-              <h5 class="text-xs font-semibold text-gray-700">Form Data</h5>
-              <button @click="toggleSection('formData')" class="text-xs text-gray-500">
+              <h5 class="text-xs font-semibold" style="color: var(--text-primary);">Form Data</h5>
+              <button @click="toggleSection('formData')" 
+                      class="text-xs transition-colors duration-200" 
+                      style="color: var(--text-secondary);">
                 {{ expandedSections.formData ? 'Collapse' : 'Expand' }}
               </button>
             </div>
@@ -74,23 +102,29 @@
           <!-- Validation Status -->
           <div class="space-y-2">
             <div class="flex items-center justify-between">
-              <h5 class="text-xs font-semibold text-gray-700">Validation</h5>
-              <button @click="toggleSection('validation')" class="text-xs text-gray-500">
+              <h5 class="text-xs font-semibold" style="color: var(--text-primary);">Validation</h5>
+              <button @click="toggleSection('validation')" 
+                      class="text-xs transition-colors duration-200" 
+                      style="color: var(--text-secondary);">
                 {{ expandedSections.validation ? 'Collapse' : 'Expand' }}
               </button>
             </div>
             <div v-if="expandedSections.validation" class="pl-4">
               <div class="text-xs">
                 <div class="flex items-center justify-between py-1">
-                  <span class="text-gray-600">Current Step Valid:</span>
-                  <span :class="store.currentStepValidation.isValid ? 'text-green-600' : 'text-red-600'">
+                  <span style="color: var(--text-secondary);">Current Step Valid:</span>
+                  <span :style="{
+                    color: store.currentStepValidation.isValid ? 'var(--success-500)' : 'var(--error-500)'
+                  }">
                     {{ store.currentStepValidation.isValid ? 'Yes' : 'No' }}
                   </span>
                 </div>
                 <div v-if="store.currentStepValidation.requiredFields.length > 0" class="mt-2">
-                  <span class="text-gray-600">Required Fields:</span>
+                  <span style="color: var(--text-secondary);">Required Fields:</span>
                   <ul class="mt-1 list-disc list-inside">
-                    <li v-for="field in store.currentStepValidation.requiredFields" :key="field" class="text-gray-800">
+                    <li v-for="field in store.currentStepValidation.requiredFields" 
+                        :key="field" 
+                        style="color: var(--text-primary);">
                       {{ field }}
                     </li>
                   </ul>
