@@ -6,13 +6,20 @@
  * Uses different colors to distinguish between basic info and standards.
  */
 <template>
-  <div class="mb-8 border-2 border-dashed border-blue-300 rounded-xl p-4 bg-blue-50/50">
+  <div class="mb-8 border-2 border-dashed rounded-xl p-4 transition-colors duration-200"
+       :style="{
+         borderColor: 'var(--primary-300)',
+         backgroundColor: 'var(--primary-50)'
+       }">
     <div class="flex flex-wrap gap-2">
       <template v-for="(field, key) in displayFields" :key="key">
         <!-- Individual Field Indicator -->
         <div v-if="field.value" 
-          class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
-          :class="field.type === 'standards' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'"
+          class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium transition-colors duration-200"
+          :style="{
+            backgroundColor: field.type === 'standards' ? 'var(--success-500)' : 'var(--primary-100)',
+            color: field.type === 'standards' ? 'var(--success-900)' : 'var(--primary-700)'
+          }"
         >
           <span>{{ field.label }}</span>
         </div>
@@ -112,4 +119,13 @@ const displayFields = computed(() => {
 
   return fields;
 });
-</script> 
+</script>
+
+<style scoped>
+/* Theme-specific transitions */
+.transition-colors {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+</style> 

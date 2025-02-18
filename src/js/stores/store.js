@@ -20,9 +20,10 @@ export const useStore = defineStore('store', {
      * 0: Entry - Initial subject selection
      * 1: Course Details - Age range, duration, dates
      * 2: Standards - Educational standards selection
-     * 3: Review - Final review before generation
+     * 3: Questions - Teaching style and preferences
+     * 4: Review - Final review before generation
      */
-    steps: ['Entry', 'Course Details', 'Standards', 'Review'],
+    steps: ['Entry', 'Course Details', 'Standards', 'Questions', 'Review'],
     
     isDebugMode: false,  // Controls debug panel visibility
     
@@ -175,7 +176,8 @@ export const useStore = defineStore('store', {
      * 0 (Entry): Requires subject selection
      * 1 (Course Details): Requires age range, duration, start/end dates
      * 2 (Standards): Requires standards type and state if applicable
-     * 3 (Review): No validation, always valid
+     * 3 (Questions): No validation, always valid
+     * 4 (Review): No validation, always valid
      */
     currentStepValidation: (state) => {
       switch (state.currentStep) {
@@ -219,7 +221,13 @@ export const useStore = defineStore('store', {
             ]
           };
 
-        case 3: // Review
+        case 3: // Questions
+          return {
+            isValid: true,
+            requiredFields: []
+          };
+
+        case 4: // Review
           return {
             isValid: true,
             requiredFields: []
@@ -317,7 +325,10 @@ export const useStore = defineStore('store', {
             router.push('/onboard/standards');       // From Course Details to Standards
             break;
           case 3:
-            router.push('/create');                  // From Standards to Review
+            router.push('/onboard/questions');         // From Standards to Questions
+            break;
+          case 4:
+            router.push('/create');                  // From Questions to Review
             break;
         }
       }
@@ -337,6 +348,9 @@ export const useStore = defineStore('store', {
             break;
           case 2:
             router.push('/onboard/standards');       // Back to Standards
+            break;
+          case 3:
+            router.push('/onboard/questions');         // Back to Questions
             break;
         }
       }

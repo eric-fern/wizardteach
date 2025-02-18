@@ -29,7 +29,9 @@ Another idea is auto grader
 - **Centralized Navigation**: All wizard step navigation is managed by `BaseWizardStep`
 - **State Management**: Pinia store with predictable state updates and debug capabilities
 - **Component Reusability**: Shared components for common functionality
-- **Debug System**: Comprehensive debug panel for development and troubleshooting
+- **Self-Contained Components**: Components like `WizardAssistant` manage their own visibility and state
+- **Modular Design**: Each component and feature can be easily modified or removed
+- **Simple Over Complex**: Favor straightforward implementations unless complexity is justified
 
 ### Overall System
 ```mermaid
@@ -39,7 +41,6 @@ graph LR
     Store -->|Debug| Debug[Debug Panel]
     Router -->|Guard| Nav[Navigation Control]
     Nav -->|Sync| Store
-    UI -->|API| Backend[Backend Services]
 ```
 
 ### Frontend Architecture
@@ -49,19 +50,16 @@ graph TD
     APP[App.vue] --> ROUTER[Vue Router]
     ROUTER --> VIEWS[Views]
     
-    %% Main Views
-    VIEWS --> WIZARD[Wizard System]
-    WIZARD --> ONBOARD[Onboarding]
-    WIZARD --> MATERIALS[Materials]
+    %% Main Views & Components
+    VIEWS --> WIZARD[Wizard Steps]
+    APP --> SHARED[Shared Components]
     
-    %% Wizard Components
-    ONBOARD --> BASE[BaseWizardStep]
-    BASE --> NAV[Centralized Navigation]
-    BASE --> PROGRESS[Progress Tracking]
+    %% Key Components
+    SHARED --> ASSISTANT[WizardAssistant]
+    SHARED --> DEBUG[DebugPanel]
     
-    %% State Management
+    %% State
     STORE[Pinia Store] --> |State| APP
-    STORE --> |Debug| DEBUG[Debug Panel]
 ```
 
 ## File Structure
@@ -70,11 +68,12 @@ src/
 └── js/
     ├── components/
     │   └── shared/                    # Shared components
-    │       ├── BlueDottedOvalShowsCompletedFormFields.vue
+    │       ├── WizardAssistant.vue    # Self-managed contextual helper
     │       ├── DebugPanel.vue         # Debug interface
     │       ├── StateTree.vue          # State visualization
-    │       ├── TextBoxWithAITag.vue
+    │       ├── TextBoxWithAITag.vue   # AI-enabled input
     │       ├── UploadAndHoldFileWithinPinia.vue
+    │       ├── BlueDottedOvalShowsCompletedFormFields.vue
     │       └── GlobalNav.vue
     │
     ├── views/
@@ -87,18 +86,43 @@ src/
     │       ├── CourseDetails.vue
     │       └── ChooseStandards.vue
     │
-    ├── stores/                        # Pinia stores
+    ├── stores/                        # State management
     │   └── store.js
     │
-    ├── router/                        # Vue Router configuration
+    ├── router/                        # Routing configuration
     │   └── index.js
     │
-    ├── models/                        # Data models
+    ├── api/                          # API integrations
+    ├── config/                       # Application configuration
+    ├── models/                       # Data models
     │   └── Request.js
     │
-    ├── app.js                         # Application entry point
-    └── App.vue                        # Root component
+    ├── app.js                        # Application entry
+    └── App.vue                       # Root component
 ```
+
+## WizardAssistant Architecture
+
+The `WizardAssistant` component is a simple, self-contained helper that appears in specific views to guide users.
+
+### Key Features
+- **Self-Managed Visibility**: Component decides when to show itself based on the current route
+- **Simple Positioning**: Views can override default bottom-right position if needed
+- **Contextual Help**: Shows relevant messages based on which view the user is in
+
+### Usage
+```vue
+<!-- In App.vue - Default bottom-right positioning -->
+<WizardAssistant />
+
+<!-- In a specific view - Custom position -->
+<WizardAssistant position="bottom-left" />
+```
+
+### Adding to New Views
+1. Add view name to `WIZARD_ENABLED_VIEWS` in the component
+2. Add a message for that view
+3. Optionally specify a different position
 
 ## Implementation Phases
 

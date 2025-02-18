@@ -10,7 +10,19 @@ export const theme = {
       600: '#4338ca',
       700: '#3730a3',
       800: '#312e81',
-      900: '#1e1b4b'
+      900: '#1e1b4b',
+      dark: {
+        50: '#1a1836',
+        100: '#1e1b4b',
+        200: '#2e2a5f',
+        300: '#3730a3',
+        400: '#4338ca',
+        500: '#5340ff',
+        600: '#6d5aff',
+        700: '#8778ff',
+        800: '#a193ff',
+        900: '#bbb1ff'
+      }
     },
     accent: {
       50: '#fff1f2',
@@ -47,7 +59,15 @@ export const theme = {
       700: '#374151',
       800: '#1f2937',
       900: '#111827'
-    }
+    },
+    dark: {
+      bg: '#18191A',
+      elevated: '#242526',
+      text: '#E4E6EB',
+      'text-muted': '#B0B3B8',
+      border: '#3A3B3C',
+      hover: '#4E4F50'
+    },
   },
 
   // Animation durations
@@ -115,23 +135,23 @@ export const theme = {
 
   // Gradients
   gradients: {
-    subtle: 'linear-gradient(to right, var(--primary-50), var(--accent-50))',
-    primary: 'linear-gradient(to right, var(--primary-500), var(--primary-600))',
-    accent: 'linear-gradient(to right, var(--accent-500), var(--accent-600))',
-    glow: 'radial-gradient(circle at center, var(--primary-400/0.15), transparent 70%)',
-    card: 'linear-gradient(to bottom right, var(--white), var(--gray-50))',
-    mixed: 'linear-gradient(to right, var(--primary-500), var(--accent-500))'
+    subtle: 'linear-gradient(to right, var(--dark-100), var(--dark-200))',
+    primary: 'linear-gradient(to right, var(--primary-dark-500), var(--primary-dark-600))',
+    accent: 'linear-gradient(to right, var(--accent-dark-500), var(--accent-dark-600))',
+    glow: 'radial-gradient(circle at center, var(--primary-dark-400/0.15), transparent 70%)',
+    card: 'linear-gradient(to bottom right, var(--dark-100), var(--dark-200))',
+    mixed: 'linear-gradient(to right, var(--primary-dark-500), var(--accent-dark-500))'
   },
 
   // Shadows with the same feel as logomaker
   shadows: {
-    sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-    default: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-    md: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-    lg: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-    xl: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
-    glow: '0 0 15px var(--primary-500/0.5)',
-    inner: 'inset 0 2px 4px 0 rgb(0 0 0 / 0.05)',
+    sm: '0 1px 2px 0 rgb(0 0 0 / 0.25)',
+    default: '0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3)',
+    md: '0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3)',
+    lg: '0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3)',
+    xl: '0 20px 25px -5px rgb(0 0 0 / 0.3), 0 8px 10px -6px rgb(0 0 0 / 0.3)',
+    glow: '0 0 15px var(--primary-dark-500/0.5)',
+    inner: 'inset 0 2px 4px 0 rgb(0 0 0 / 0.25)',
   },
 
   // Border radiuses
@@ -218,7 +238,38 @@ export const theme = {
     modal: '1040',
     popover: '1050',
     tooltip: '1060',
-  }
+  },
+
+  // Form control styles
+  formControls: {
+    input: {
+      background: 'var(--bg-secondary)',
+      text: 'var(--text-primary)',
+      border: 'var(--border-color)',
+      focusBorder: 'var(--primary-500)',
+      hoverBorder: 'var(--primary-500)',
+      placeholder: 'var(--text-secondary)',
+      disabled: {
+        background: 'var(--bg-primary)',
+        text: 'var(--text-secondary)'
+      }
+    },
+    select: {
+      background: 'var(--bg-secondary)',
+      text: 'var(--text-primary)',
+      border: 'var(--border-color)',
+      focusBorder: 'var(--primary-500)',
+      hoverBorder: 'var(--primary-500)',
+      placeholder: 'var(--text-secondary)',
+      option: {
+        background: 'var(--bg-secondary)',
+        text: 'var(--text-primary)',
+        selectedBackground: 'var(--primary-500)',
+        selectedText: '#ffffff',
+        hoverBackground: 'var(--primary-100)'
+      }
+    }
+  },
 };
 
 // Animation keyframes
@@ -252,5 +303,78 @@ export const keyframes = `
       opacity: 1;
       transform: scale(1);
     }
+  }
+
+  /* Form Control Base Styles */
+  .form-input,
+  .form-select,
+  .form-textarea {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    width: 100%;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Placeholder Styles */
+  .form-input::placeholder,
+  .form-select::placeholder,
+  .form-textarea::placeholder,
+  .form-select option[value=""] {
+    color: var(--text-secondary);
+    opacity: 0.7;
+  }
+
+  /* Focus States */
+  .form-input:focus,
+  .form-select:focus,
+  .form-textarea:focus {
+    outline: none;
+    border-color: var(--primary-500);
+    box-shadow: 0 0 0 1px var(--primary-500);
+  }
+
+  /* Hover States */
+  .form-input:hover:not(:disabled),
+  .form-select:hover:not(:disabled),
+  .form-textarea:hover:not(:disabled) {
+    border-color: var(--primary-500);
+  }
+
+  /* Select Specific Styles */
+  .form-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+    background-size: 1em;
+    padding-right: 2.5rem;
+  }
+
+  .form-select option {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    padding: 0.5rem;
+  }
+
+  .form-select option:first-child {
+    color: var(--text-secondary);
+    opacity: 0.7;
+  }
+
+  .form-select option:checked {
+    background-color: var(--primary-500);
+    color: white;
+  }
+
+  /* Disabled States */
+  .form-input:disabled,
+  .form-select:disabled,
+  .form-textarea:disabled {
+    background-color: var(--bg-primary);
+    color: var(--text-secondary);
+    cursor: not-allowed;
   }
 `; 

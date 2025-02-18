@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen dark" :class="{ 'dark': true }" style="background-color: var(--bg-secondary);">
     <router-view v-slot="{ Component }">
       <transition name="fade" mode="out-in">
         <component :is="Component" />
@@ -7,12 +7,14 @@
     </router-view>
     <GlobalNav />
     <DebugPanel />
+    <WizardAssistant />
   </div>
 </template>
 
 <script setup>
 import DebugPanel from './components/shared/DebugPanel.vue';
 import GlobalNav from './components/shared/GlobalNav.vue';
+import WizardAssistant from './components/shared/WizardAssistant.vue';
 // Component logic will be handled by the router and individual views
 </script>
 
@@ -25,5 +27,16 @@ import GlobalNav from './components/shared/GlobalNav.vue';
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* Apply dark mode styles to the root */
+:root {
+  color-scheme: dark;
+}
+
+/* Ensure background colors use CSS variables */
+.dark {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
 }
 </style> 

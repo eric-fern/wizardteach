@@ -1,95 +1,122 @@
 <template>
-  <div class="min-h-screen bg-gray-50 py-8">
+  <div class="min-h-screen py-8" style="background-color: var(--bg-secondary);">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">My Curricula</h1>
-        <p class="mt-2 text-sm text-gray-600">
-          Manage and edit your saved curriculum plans
-        </p>
-      </div>
+      <!-- Header -->
+      <h1 class="text-3xl font-bold" style="color: var(--text-primary);">My Curricula</h1>
+      <p class="mt-2 text-sm" style="color: var(--text-secondary);">
+        Manage and track your curriculum development progress
+      </p>
 
-      <div class="bg-white shadow overflow-hidden sm:rounded-md">
-        <ul class="divide-y divide-gray-200">
-          <li v-for="curriculum in savedCurricula" :key="curriculum.id">
-            <div class="px-4 py-4 sm:px-6 hover:bg-gray-50 cursor-pointer">
-              <div class="flex items-center justify-between">
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-center">
-                    <div class="flex-shrink-0">
-                      <div 
-                        class="h-12 w-12 rounded-full flex items-center justify-center bg-primary text-white"
-                      >
-                        {{ curriculum.subject.charAt(0).toUpperCase() }}
-                      </div>
-                    </div>
-                    <div class="ml-4">
-                      <h2 class="text-lg font-medium text-gray-900 truncate">
-                        {{ curriculum.customization.className }}
-                      </h2>
-                      <div class="mt-1 flex items-center">
-                        <span class="text-sm text-gray-500">
-                          {{ curriculum.subject }} | Grade {{ curriculum.gradeLevel }}
-                        </span>
-                        <span class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
-                              :class="statusClasses[curriculum.status]">
-                          {{ curriculum.status }}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+      <!-- Curriculum List -->
+      <div class="mt-8 rounded-md shadow-sm" style="background-color: var(--bg-primary);">
+        <div v-if="curricula.length > 0">
+          <!-- Curriculum Items -->
+          <div
+            v-for="curriculum in curricula"
+            :key="curriculum.id"
+            class="px-4 py-4 sm:px-6 cursor-pointer transition-colors duration-200"
+            :style="{
+              backgroundColor: 'var(--bg-primary)',
+              '&:hover': {
+                backgroundColor: 'var(--bg-secondary)'
+              }
+            }"
+            @click="handleCurriculumClick(curriculum)"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex items-center min-w-0 space-x-3">
+                <div
+                  class="h-12 w-12 rounded-full flex items-center justify-center"
+                  style="background-color: var(--primary-500); color: #ffffff;"
+                >
+                  {{ curriculum.subject.charAt(0).toUpperCase() }}
                 </div>
-                <div class="flex items-center space-x-4">
-                  <el-button type="text" @click="editCurriculum(curriculum)">
-                    Edit
-                  </el-button>
-                  <el-button type="text" @click="downloadPDF(curriculum)">
-                    Download
-                  </el-button>
-                  <el-button type="text" class="text-danger" @click="deleteCurriculum(curriculum)">
-                    Delete
-                  </el-button>
-                </div>
-              </div>
-              <div class="mt-4">
-                <div class="sm:flex sm:items-center sm:justify-between">
-                  <div class="sm:flex sm:space-x-4">
-                    <p class="flex items-center text-sm text-gray-500">
-                      <span>Teacher: {{ curriculum.customization.teacherName }}</span>
-                    </p>
-                    <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                      <span>School: {{ curriculum.customization.schoolName }}</span>
-                    </p>
-                  </div>
-                  <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                    <span>
-                      Created {{ new Date(curriculum.createdAt).toLocaleDateString() }}
+                <div class="min-w-0 flex-1">
+                  <h2 class="text-lg font-medium truncate" style="color: var(--text-primary);">
+                    {{ curriculum.subject }}
+                  </h2>
+                  <div class="mt-1 flex items-center">
+                    <span class="text-sm" style="color: var(--text-secondary);">
+                      {{ curriculum.gradeLevel }}
+                    </span>
+                    <span
+                      class="ml-2 px-2 py-1 text-xs font-medium rounded-full"
+                      :style="{
+                        backgroundColor: getStatusColor(curriculum.status).bg,
+                        color: getStatusColor(curriculum.status).text
+                      }"
+                    >
+                      {{ curriculum.status }}
                     </span>
                   </div>
                 </div>
               </div>
-            </div>
-          </li>
-        </ul>
-      </div>
 
-      <div v-if="savedCurricula.length === 0" class="text-center py-12">
-        <div class="text-gray-400">
-          <svg class="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
+              <!-- Meta Information -->
+              <div class="flex flex-col items-end space-y-2">
+                <p class="flex items-center text-sm" style="color: var(--text-secondary);">
+                  {{ curriculum.lastModified }}
+                </p>
+                <p class="flex items-center text-sm" style="color: var(--text-secondary);">
+                  {{ curriculum.completionPercentage }}% Complete
+                </p>
+                <div class="flex items-center text-sm" style="color: var(--text-secondary);">
+                  {{ curriculum.totalLessons }} Lessons
+                </div>
+              </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="mt-4 w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                class="h-full rounded-full transition-all duration-500"
+                :style="{
+                  width: `${curriculum.completionPercentage}%`,
+                  backgroundColor: 'var(--primary-500)'
+                }"
+              ></div>
+            </div>
+          </div>
         </div>
-        <h3 class="mt-2 text-sm font-medium text-gray-900">No curricula</h3>
-        <p class="mt-1 text-sm text-gray-500">
-          Get started by creating a new curriculum
-        </p>
-        <div class="mt-6">
-          <router-link
-            to="/create"
-            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark"
-          >
-            Create Curriculum
-          </router-link>
+
+        <!-- Empty State -->
+        <div v-else class="text-center py-12">
+          <div style="color: var(--text-secondary);">
+            <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+          </div>
+          <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary);">No curricula</h3>
+          <p class="mt-1 text-sm" style="color: var(--text-secondary);">
+            Get started by creating your first curriculum
+          </p>
+          <div class="mt-6">
+            <router-link
+              to="/create"
+              class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md transition-colors duration-200"
+              style="background-color: var(--primary-500); color: #ffffff;"
+            >
+              <svg
+                class="-ml-1 mr-2 h-5 w-5"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              Create New Curriculum
+            </router-link>
+          </div>
         </div>
       </div>
     </div>
@@ -97,70 +124,47 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { ElMessageBox } from 'element-plus';
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
-const savedCurricula = ref([
-  {
-    id: 1,
-    subject: 'Mathematics',
-    gradeLevel: '9',
-    status: 'Complete',
-    customization: {
-      className: 'Algebra I',
-      teacherName: 'John Smith',
-      schoolName: 'Lincoln High School'
-    },
-    createdAt: '2024-02-20T12:00:00Z'
-  },
-  {
-    id: 2,
-    subject: 'Science',
-    gradeLevel: '10',
-    status: 'Draft',
-    customization: {
-      className: 'Biology',
-      teacherName: 'Sarah Johnson',
-      schoolName: 'Lincoln High School'
-    },
-    createdAt: '2024-02-19T15:30:00Z'
-  }
-]);
+const router = useRouter()
+const curricula = ref([])
 
-const statusClasses = {
-  Complete: 'bg-green-100 text-green-800',
-  Draft: 'bg-yellow-100 text-yellow-800',
-  'In Progress': 'bg-blue-100 text-blue-800'
-};
-
-const editCurriculum = (curriculum) => {
-  // TODO: Implement edit functionality
-  console.log('Edit curriculum:', curriculum);
-};
-
-const downloadPDF = (curriculum) => {
-  // TODO: Implement PDF download
-  console.log('Download PDF for:', curriculum);
-};
-
-const deleteCurriculum = async (curriculum) => {
-  try {
-    await ElMessageBox.confirm(
-      'Are you sure you want to delete this curriculum? This action cannot be undone.',
-      'Warning',
-      {
-        confirmButtonText: 'Delete',
-        cancelButtonText: 'Cancel',
-        type: 'warning'
+const getStatusColor = (status) => {
+  switch (status) {
+    case 'In Progress':
+      return {
+        bg: 'var(--primary-100)',
+        text: 'var(--primary-800)'
       }
-    );
-    // TODO: Implement actual delete
-    const index = savedCurricula.value.findIndex(c => c.id === curriculum.id);
-    if (index > -1) {
-      savedCurricula.value.splice(index, 1);
-    }
-  } catch {
-    // User cancelled
+    case 'Complete':
+      return {
+        bg: 'var(--success-100)',
+        text: 'var(--success-800)'
+      }
+    case 'Draft':
+      return {
+        bg: 'var(--accent-100)',
+        text: 'var(--accent-800)'
+      }
+    default:
+      return {
+        bg: 'var(--bg-secondary)',
+        text: 'var(--text-secondary)'
+      }
   }
-};
-</script> 
+}
+
+const handleCurriculumClick = (curriculum) => {
+  router.push(`/curriculum/${curriculum.id}`)
+}
+</script>
+
+<style scoped>
+/* Theme-specific transitions */
+.transition-colors {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+</style> 

@@ -3,6 +3,7 @@ import { useStore } from '../stores/store';
 import OnboardEntry from '../views/onboardwizard/OnboardEntry.vue';
 import CourseDetails from '../views/onboardwizard/CourseDetails.vue';
 import ChooseStandards from '../views/onboardwizard/ChooseStandards.vue';
+import Wizard10Questions from '../views/onboardwizard/Wizard10Questions.vue';
 import CurriculumWizard from '../views/CurriculumWizard.vue';
 import Dashboard from '../views/Dashboard.vue';
 import MaterialsView from '../views/MaterialsView.vue';
@@ -41,6 +42,14 @@ const routes = [
     component: ChooseStandards,
     meta: { 
       step: 2,  // Standards selection step
+    }
+  },
+  {
+    path: '/onboard/questions',
+    name: 'Wizard10Questions',
+    component: Wizard10Questions,
+    meta: {
+      step: 3,  // Questions step
     }
   },
   {

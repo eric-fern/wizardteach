@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+    darkMode: 'class',
     content: [
         "./index.html",
         "./src/**/*.{vue,js,ts,jsx,tsx}",
@@ -43,6 +44,37 @@ module.exports = {
                     500: 'var(--error-500)',
                     600: 'var(--error-600)',
                 },
+                dark: {
+                    bg: 'var(--dark-bg)',
+                    elevated: 'var(--dark-elevated)',
+                    border: 'var(--dark-border)',
+                    hover: 'var(--dark-hover)',
+                    text: 'var(--dark-text)',
+                    'text-muted': 'var(--dark-text-muted)'
+                },
+                theme: {
+                    bg: 'var(--bg-primary)',
+                    'bg-secondary': 'var(--bg-secondary)',
+                    text: 'var(--text-primary)',
+                    'text-secondary': 'var(--text-secondary)',
+                    border: 'var(--border-color)'
+                }
+            },
+            backgroundColor: {
+                dark: 'var(--dark-bg)',
+                'dark-elevated': 'var(--dark-elevated)',
+                'theme-bg': 'var(--bg-primary)',
+                'theme-bg-secondary': 'var(--bg-secondary)'
+            },
+            textColor: {
+                dark: 'var(--dark-text)',
+                'dark-muted': 'var(--dark-text-muted)',
+                'theme-text': 'var(--text-primary)',
+                'theme-text-secondary': 'var(--text-secondary)'
+            },
+            borderColor: {
+                dark: 'var(--dark-border)',
+                'theme-border': 'var(--border-color)'
             },
             boxShadow: {
                 sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
@@ -83,7 +115,7 @@ module.exports = {
             backgroundImage: {
                 'gradient-primary': 'linear-gradient(to right, var(--primary-500), var(--primary-600))',
                 'gradient-accent': 'linear-gradient(to right, var(--accent-500), var(--accent-600))',
-                'gradient-subtle': 'linear-gradient(to right, #f9fafb, #f3f4f6)',
+                'gradient-subtle': 'linear-gradient(to right, var(--bg-primary), var(--bg-secondary))',
             },
         },
     },

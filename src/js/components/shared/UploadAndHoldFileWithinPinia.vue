@@ -1,9 +1,12 @@
 <template>
-  <div class="bg-white rounded-lg shadow-sm p-6 max-w-2xl mx-auto">
+  <div class="rounded-lg shadow-sm p-6" style="background-color: var(--bg-primary);">
     <!-- Upload Area -->
     <div 
-      class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center"
-      :class="{ 'border-blue-500 bg-blue-50': isDragging }"
+      class="border-2 border-dashed rounded-lg p-8 text-center transition-colors duration-200"
+      :style="{
+        borderColor: isDragging ? 'var(--primary-500)' : 'var(--border-color)',
+        backgroundColor: isDragging ? 'var(--primary-50)' : 'var(--bg-primary)'
+      }"
       @dragover.prevent="isDragging = true"
       @dragleave.prevent="isDragging = false"
       @drop.prevent="handleFileDrop"
@@ -18,18 +21,19 @@
 
       <!-- Upload State -->
       <div v-if="!store.uploadedMaterials.pdf">
-        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg class="mx-auto h-12 w-12" style="color: var(--text-secondary);" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
         </svg>
         <div class="mt-4">
           <button 
             @click="triggerFileInput"
-            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm transition-colors duration-200"
+            style="background-color: var(--primary-500); color: #ffffff;"
           >
             Upload PDF
           </button>
         </div>
-        <p class="mt-2 text-sm text-gray-600">
+        <p class="mt-2 text-sm" style="color: var(--text-secondary);">
           or drag and drop your PDF file here
         </p>
       </div>
@@ -37,14 +41,14 @@
       <!-- File Preview -->
       <div v-else class="animate-fade-in">
         <div class="flex items-center justify-center space-x-4">
-          <svg class="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg class="h-8 w-8" style="color: var(--primary-500);" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
           </svg>
           <div class="text-left">
-            <p class="text-sm font-medium text-gray-900">
+            <p class="text-sm font-medium" style="color: var(--text-primary);">
               {{ store.uploadedMaterials.metadata.filename }}
             </p>
-            <p class="text-xs text-gray-500">
+            <p class="text-xs" style="color: var(--text-secondary);">
               {{ formatFileSize(store.uploadedMaterials.metadata.size) }}
             </p>
           </div>
@@ -54,13 +58,19 @@
         <div class="mt-4 flex justify-center space-x-4">
           <button 
             @click="store.clearPdfMaterial()"
-            class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            class="inline-flex items-center px-3 py-1.5 border text-xs font-medium rounded-md transition-colors duration-200"
+            :style="{
+              backgroundColor: 'var(--bg-primary)',
+              color: 'var(--text-primary)',
+              borderColor: 'var(--border-color)'
+            }"
           >
             Remove
           </button>
           <button 
             @click="triggerFileInput"
-            class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md transition-colors duration-200"
+            style="background-color: var(--primary-500); color: #ffffff;"
           >
             Replace
           </button>
@@ -74,7 +84,7 @@
     </div>
 
     <!-- File Requirements -->
-    <div class="mt-4 text-xs text-gray-500">
+    <div class="mt-4 text-xs" style="color: var(--text-secondary);">
       <p>Accepted file type: PDF</p>
       <p>Maximum file size: 100MB</p>
     </div>

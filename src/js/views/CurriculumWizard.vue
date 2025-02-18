@@ -1,5 +1,23 @@
 <template>
-  <div class="min-h-screen bg-gray-50 p-8">
+  <div class="min-h-screen p-8" style="background-color: var(--bg-secondary);">
+    <!-- AI Assistant Banner -->
+    <div class="mb-8 rounded-xl p-4 border-2 border-dashed" 
+         style="background-color: var(--primary-50); border-color: var(--primary-300);">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <span 
+            class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+            style="background-color: var(--primary-100); color: var(--primary-700);"
+          >
+            AI-Powered ✨
+          </span>
+          <p style="color: var(--primary-700);">
+            Our AI assistant will help you create a comprehensive curriculum
+          </p>
+        </div>
+      </div>
+    </div>
+
     <!-- Main Content -->
     <div class="max-w-3xl mx-auto">
       <!-- Selection Tags -->
@@ -110,319 +128,80 @@
 
       <!-- Progress Steps -->
       <div class="mb-8">
-        <div class="flex items-center justify-between">
-          <div 
-            v-for="(step, index) in steps" 
-            :key="index"
-            class="flex items-center"
-          >
-            <div 
-              class="w-10 h-10 rounded-full flex items-center justify-center border-2"
+        <div class="flex items-center">
+          <div v-for="(step, index) in steps" :key="step.id" class="flex items-center">
+            <!-- Step Circle -->
+            <div
+              class="w-8 h-8 rounded-full flex items-center justify-center border-2 transition-colors duration-200"
               :class="{
-                'border-blue-500 bg-blue-500 text-white': currentStep > index,
-                'border-blue-500 bg-white text-blue-500': currentStep === index,
-                'border-gray-300 bg-white text-gray-500': currentStep < index
+                'cursor-pointer': currentStep >= index
               }"
+              :style="{
+                backgroundColor: getStepStyle(index).bg,
+                borderColor: getStepStyle(index).border,
+                color: getStepStyle(index).text
+              }"
+              @click="currentStep >= index && goToStep(index)"
             >
               {{ index + 1 }}
             </div>
-            <div 
+
+            <!-- Connector Line -->
+            <div
               v-if="index < steps.length - 1"
-              class="flex-1 h-0.5 mx-4"
-              :class="{
-                'bg-blue-500': currentStep > index,
-                'bg-gray-300': currentStep <= index
+              class="w-24 h-1 mx-2 rounded transition-colors duration-200"
+              :style="{
+                backgroundColor: currentStep > index ? 'var(--primary-500)' : 'var(--border-color)'
               }"
             ></div>
           </div>
         </div>
-        <div class="flex justify-between mt-2">
-          <div 
-            v-for="(step, index) in steps" 
-            :key="index"
-            class="text-sm font-medium"
-            :class="{
-              'text-blue-500': currentStep >= index,
-              'text-gray-500': currentStep < index
-            }"
-          >
-            {{ step }}
+
+        <!-- Step Labels -->
+        <div class="flex items-center mt-2">
+          <div v-for="(step, index) in steps" :key="step.id" class="flex items-center">
+            <div
+              class="w-8 text-center text-sm font-medium transition-colors duration-200"
+              :style="{
+                color: currentStep >= index ? 'var(--primary-500)' : 'var(--text-secondary)'
+              }"
+            >
+              {{ step.label }}
+            </div>
+            <div v-if="index < steps.length - 1" class="w-24 mx-2"></div>
           </div>
         </div>
       </div>
 
       <!-- Step Content -->
-      <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-        <!-- Step 1: Course Details -->
-        <CourseDetails 
-          v-if="currentStep === 0"
-        />
-
-        <!-- Step 2: Standards -->
-        <div v-if="currentStep === 1">
-          <div class="space-y-6">
-            <div>
-              <h2 class="text-xl font-bold text-gray-900 mb-4">Curriculum Standards</h2>
-              
-              <!-- Standards Type Selection -->
-              <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-4">Select Standards Type</label>
-                <div class="space-y-2">
-                  <!-- National Standards -->
-                  <div class="mb-4">
-                    <h3 class="text-sm font-medium text-gray-700 mb-2">National & International Standards</h3>
-                    <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                      <input 
-                        type="radio" 
-                        v-model="formData.standards.type"
-                        value="common-core"
-                        class="h-4 w-4 text-blue-500 border-gray-300 focus:ring-blue-500"
-                      >
-                      <div class="ml-3">
-                        <span class="text-sm font-medium text-gray-900">Common Core Standards</span>
-                        <p class="text-sm text-gray-500">Nationally recognized K-12 academic standards</p>
-                      </div>
-                    </label>
-
-                    <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer mt-2">
-                      <input 
-                        type="radio" 
-                        v-model="formData.standards.type"
-                        value="ap"
-                        @change="handleAPorIBSelection"
-                        class="h-4 w-4 text-blue-500 border-gray-300 focus:ring-blue-500"
-                      >
-                      <div class="ml-3">
-                        <span class="text-sm font-medium text-gray-900">Advanced Placement (AP)</span>
-                        <p class="text-sm text-gray-500">College Board AP curriculum standards for college-level courses</p>
-                      </div>
-                    </label>
-
-                    <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer mt-2">
-                      <input 
-                        type="radio" 
-                        v-model="formData.standards.type"
-                        value="ib"
-                        @change="handleAPorIBSelection"
-                        class="h-4 w-4 text-blue-500 border-gray-300 focus:ring-blue-500"
-                      >
-                      <div class="ml-3">
-                        <span class="text-sm font-medium text-gray-900">International Baccalaureate (IB)</span>
-                        <p class="text-sm text-gray-500">International education framework and standards</p>
-                      </div>
-                    </label>
-                  </div>
-
-                  <!-- State Standards -->
-                  <div class="pt-4 border-t">
-                    <h3 class="text-sm font-medium text-gray-700 mb-2">State-Specific Standards</h3>
-                    <label class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer">
-                      <input 
-                        type="radio" 
-                        v-model="formData.standards.type"
-                        value="state"
-                        class="h-4 w-4 text-blue-500 border-gray-300 focus:ring-blue-500"
-                      >
-                      <div class="ml-3">
-                        <span class="text-sm font-medium text-gray-900">State Standards</span>
-                        <p class="text-sm text-gray-500">Standards specific to your state's requirements</p>
-                      </div>
-                    </label>
-
-                    <!-- State Selection (only shown when state standards are selected) -->
-                    <div v-if="formData.standards.type === 'state'" 
-                      class="mt-3 ml-7 p-4 bg-gray-50 rounded-lg border border-gray-200"
-                    >
-                      <label class="block text-sm font-medium text-gray-700 mb-2">Select Your State</label>
-                      <select 
-                        v-model="formData.standards.state"
-                        class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 border-gray-300"
-                      >
-                        <option value="">Choose a state</option>
-                        <option v-for="state in states" :key="state.code" :value="state.code">
-                          {{ state.name }}
-                        </option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Student Accommodations -->
-              <div class="mb-6 pt-4 border-t">
-                <h3 class="text-sm font-medium text-gray-700 mb-4">Student Accommodations</h3>
-                <div class="bg-gray-50 p-4 rounded-lg">
-                  <div class="flex space-x-6">
-                    <label class="inline-flex items-center group relative">
-                      <input 
-                        type="checkbox" 
-                        v-model="formData.studentComposition.esl"
-                        class="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
-                      >
-                      <span class="ml-2 text-sm text-gray-700">ESL</span>
-                      <button class="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </button>
-                      <div class="invisible group-hover:visible absolute bottom-full left-0 mb-2 w-48 p-2 bg-gray-900 text-white text-xs rounded shadow-lg">
-                        English as Second Language learners - Materials will include language support
-                      </div>
-                    </label>
-                    <label class="inline-flex items-center group relative">
-                      <input 
-                        type="checkbox" 
-                        v-model="formData.studentComposition.iep"
-                        class="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
-                      >
-                      <span class="ml-2 text-sm text-gray-700">IEP</span>
-                      <button class="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </button>
-                      <div class="invisible group-hover:visible absolute bottom-full left-0 mb-2 w-48 p-2 bg-gray-900 text-white text-xs rounded shadow-lg">
-                        Individualized Education Program - Includes modified content and accommodations
-                      </div>
-                    </label>
-                    <label class="inline-flex items-center group relative">
-                      <input 
-                        type="checkbox" 
-                        v-model="formData.studentComposition.gifted"
-                        class="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
-                      >
-                      <span class="ml-2 text-sm text-gray-700">Gifted</span>
-                      <button class="ml-1 text-gray-400 hover:text-gray-600 focus:outline-none">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </button>
-                      <div class="invisible group-hover:visible absolute bottom-full left-0 mb-2 w-48 p-2 bg-gray-900 text-white text-xs rounded shadow-lg">
-                        Advanced learners - Includes enrichment and challenging content
-                      </div>
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Test Prep -->
-              <div class="mb-6 pt-4 border-t">
-                <h3 class="text-sm font-medium text-gray-700 mb-4">Test Preparation Focus</h3>
-                <div class="bg-gray-50 p-4 rounded-lg">
-                  <div class="grid grid-cols-2 gap-4">
-                    <label class="inline-flex items-center">
-                      <input 
-                        type="checkbox" 
-                        v-model="formData.testPrep.ap"
-                        :disabled="formData.standards.type === 'ap'"
-                        class="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
-                      >
-                      <span class="ml-2 text-sm text-gray-700">AP Exam Prep</span>
-                    </label>
-                    <label class="inline-flex items-center">
-                      <input 
-                        type="checkbox" 
-                        v-model="formData.testPrep.ib"
-                        :disabled="formData.standards.type === 'ib'"
-                        class="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
-                      >
-                      <span class="ml-2 text-sm text-gray-700">IB Exam Prep</span>
-                    </label>
-                    <label class="inline-flex items-center">
-                      <input 
-                        type="checkbox" 
-                        v-model="formData.testPrep.sat"
-                        class="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
-                      >
-                      <span class="ml-2 text-sm text-gray-700">SAT Prep</span>
-                    </label>
-                    <label class="inline-flex items-center">
-                      <input 
-                        type="checkbox" 
-                        v-model="formData.testPrep.act"
-                        class="form-checkbox h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500"
-                      >
-                      <span class="ml-2 text-sm text-gray-700">ACT Prep</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Standards Preview -->
-              <div class="bg-gray-50 rounded-lg p-4">
-                <div class="flex items-center justify-between mb-4">
-                  <h3 class="text-sm font-medium text-gray-900">Selected Standards Preview</h3>
-                  <span class="text-xs text-gray-500">Full standards list will be included in generated materials</span>
-                </div>
-                <div class="space-y-2">
-                  <div v-if="formData.standards.type" class="p-3 bg-white rounded-lg border border-gray-200">
-                    <div class="text-sm text-gray-900">
-                      {{ getStandardsTypeLabel(formData.standards.type) }}
-                      <span v-if="formData.standards.type === 'state' && formData.standards.state" class="ml-2 text-gray-500">
-                        - {{ getStateName(formData.standards.state) }}
-                      </span>
-                    </div>
-                    <div class="mt-2 text-xs text-gray-500">
-                      All materials will be aligned with {{ getStandardsTypeLabel(formData.standards.type) }}
-                      {{ formData.standards.type === 'state' && formData.standards.state ? 'for ' + getStateName(formData.standards.state) : '' }}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Step 3: Review -->
-        <div v-if="currentStep === 2">
-          <h2 class="text-2xl font-bold text-gray-900 mb-4">Review Your Selections</h2>
-          <div class="space-y-4">
-            <div class="p-4 bg-gray-50 rounded-lg">
-              <div class="font-medium text-gray-700">Subject</div>
-              <div class="mt-1 text-lg">{{ formData.subject }}</div>
-            </div>
-            <div class="p-4 bg-gray-50 rounded-lg">
-              <div class="font-medium text-gray-700">Grade Level</div>
-              <div class="mt-1 text-lg">{{ getGradeLevelLabel(formData.studentAgeRange) }}</div>
-            </div>
-            <div class="p-4 bg-gray-50 rounded-lg">
-              <div class="font-medium text-gray-700">Course Duration</div>
-              <div class="mt-1 text-lg">
-                {{ formatDate(formData.startDate) }} - {{ formatDate(formData.endDate) }}
-                <br>
-                <span class="text-sm text-gray-600">
-                  {{ formatDuration(formData.lessonDuration) }}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div class="rounded-lg shadow-sm p-6" style="background-color: var(--bg-primary);">
+        <component :is="currentStepComponent" @next="nextStep" @prev="prevStep" />
       </div>
+    </div>
 
-      <!-- Navigation Buttons -->
-      <div class="flex justify-between mt-6">
-        <button 
-          v-if="currentStep > 0"
-          @click="store.prevStep()"
-          class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
-        >
-          Previous
-        </button>
-        <div class="flex-1"></div>
-        <button 
-          v-if="currentStep < steps.length - 1"
-          @click="store.nextStep()"
-          :disabled="!store.canProceed"
-          :class="[
-            'px-4 py-2 text-sm font-medium rounded-lg',
-            store.isDebugMode || store.canProceed 
-              ? 'bg-blue-500 text-white hover:bg-blue-600' 
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          ]"
-        >
-          Next
-        </button>
-      </div>
+    <!-- Navigation Buttons -->
+    <div class="flex justify-between mt-6">
+      <button 
+        v-if="currentStep > 0"
+        @click="prevStep"
+        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+      >
+        Previous
+      </button>
+      <div class="flex-1"></div>
+      <button 
+        v-if="currentStep < steps.length - 1"
+        @click="nextStep"
+        :disabled="!store.canProceed"
+        :class="[
+          'px-4 py-2 text-sm font-medium rounded-lg',
+          store.isDebugMode || store.canProceed 
+            ? 'bg-blue-500 text-white hover:bg-blue-600' 
+            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+        ]"
+      >
+        Next
+      </button>
     </div>
   </div>
 </template>
@@ -437,8 +216,14 @@ import BaseWizardStep from './onboardwizard/BaseWizardStep.vue';
 const router = useRouter();
 const route = useRoute();
 const store = useStore();
-const steps = ['Course Details', 'Standards', 'Review'];
-const currentStep = computed(() => store.currentStep);
+const steps = [
+  { id: 1, label: 'Start', component: 'OnboardEntry' },
+  { id: 2, label: 'Details', component: 'CourseDetails' },
+  { id: 3, label: 'Standards', component: 'ChooseStandards' },
+  { id: 4, label: 'Questions', component: 'Wizard10Questions' },
+  { id: 5, label: 'Create', component: 'GenerateCurriculum' }
+];
+const currentStep = ref(0);
 const formData = computed(() => store.formData);
 const hasAttemptedNext = ref(false);
 
@@ -724,6 +509,70 @@ watch(() => formData.value.hasAlternatingSchedule, (newVal) => {
     });
   }
 });
+
+const currentStepComponent = computed(() => {
+  return steps[currentStep.value].component
+})
+
+const getStepStyle = (index) => {
+  if (currentStep.value > index) {
+    return {
+      bg: 'var(--primary-500)',
+      border: 'var(--primary-500)',
+      text: '#ffffff'
+    }
+  } else if (currentStep.value === index) {
+    return {
+      bg: 'var(--bg-primary)',
+      border: 'var(--primary-500)',
+      text: 'var(--primary-500)'
+    }
+  } else {
+    return {
+      bg: 'var(--bg-primary)',
+      border: 'var(--border-color)',
+      text: 'var(--text-secondary)'
+    }
+  }
+}
+
+const goToStep = (index) => {
+  if (currentStep.value >= index) {
+    currentStep.value = index
+    router.push(getStepRoute(index))
+  }
+}
+
+const nextStep = () => {
+  if (currentStep.value < steps.length - 1) {
+    currentStep.value++
+    router.push(getStepRoute(currentStep.value))
+  }
+}
+
+const prevStep = () => {
+  if (currentStep.value > 0) {
+    currentStep.value--
+    router.push(getStepRoute(currentStep.value))
+  }
+}
+
+const getStepRoute = (index) => {
+  switch (index) {
+    case 0:
+      return '/onboard'
+    case 1:
+      return '/onboard/course-details'
+    case 2:
+      return '/onboard/standards'
+    case 3:
+      return '/onboard/questions'
+    case 4:
+      return '/create'
+    default:
+      return '/onboard'
+  }
+}
 </script> 
 
 <style>
