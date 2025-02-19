@@ -129,8 +129,15 @@ import { useStore } from '../../stores/store'
 import BaseWizardStep from './BaseWizardStep.vue'
 import UploadAndHoldFileWithinPinia from '../../components/shared/UploadAndHoldFileWithinPinia.vue'
 import { useRouter } from 'vue-router'
+import { useTheme } from '../../composables/useTheme'
+import { useWizardContext } from '../../composables/useWizardContext'
 
 const store = useStore()
+const { getColor, getCommonStyles } = useTheme()
+const { useWizardNavigation, useWizardValidation } = useWizardContext()
+const { goToNext } = useWizardNavigation()
+const { isCurrentStepValid } = useWizardValidation()
+
 const selectedType = ref(store.formData.standards.selectedType)
 const selectedState = ref(store.formData.standards.state)
 const router = useRouter()
@@ -144,23 +151,38 @@ onMounted(() => {
 
 const states = store.standardsConfig.states
 
-// Use the store's validation
-const isValid = computed(() => store.isStandardsStepValid)
+// Use the validation from context
+const isValid = computed(() => isCurrentStepValid.value)
 
 const handleNext = () => {
-  // Store is already updated through the v-model and @change handlers
   if (selectedType.value === 'custom') {
     store.setPdfType('standards')
   }
-  
-  // Emit next event to BaseWizardStep
-  emit('next')
+  goToNext()
 }
 
 // Watch for state selection
 watch(selectedState, (newState) => {
   store.setStateStandard(newState)
 })
+
+// Common styles using theme
+const styles = {
+  card: {
+    ...getCommonStyles.card,
+    padding: '1.5rem',
+    borderRadius: '0.5rem'
+  },
+  input: {
+    ...getCommonStyles.input,
+    height: '1rem',
+    width: '1rem'
+  },
+  text: {
+    primary: { color: getColor('dark.text') },
+    secondary: { color: getColor('dark.text-muted') }
+  }
+}
 </script>
 
 <style scoped>
