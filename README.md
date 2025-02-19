@@ -32,15 +32,18 @@ Another idea is auto grader
 - **Self-Contained Components**: Components like `WizardAssistant` manage their own visibility and state
 - **Modular Design**: Each component and feature can be easily modified or removed
 - **Simple Over Complex**: Favor straightforward implementations unless complexity is justified
+- **Theme System**: Consistent theming with CSS variables, with escape hatches for edge cases
 
 ### Overall System
 ```mermaid
 graph LR
     UI[Vue Frontend] -->|State| Store[Pinia Store]
     UI -->|Navigation| Router[Vue Router]
+    UI -->|Theme| Theme[Theme System]
     Store -->|Debug| Debug[Debug Panel]
     Router -->|Guard| Nav[Navigation Control]
     Nav -->|Sync| Store
+    Theme -->|Variables| Components[Components]
 ```
 
 ### Frontend Architecture
@@ -49,6 +52,7 @@ graph TD
     %% Core Application
     APP[App.vue] --> ROUTER[Vue Router]
     ROUTER --> VIEWS[Views]
+    APP --> THEME[Theme System]
     
     %% Main Views & Components
     VIEWS --> WIZARD[Wizard Steps]
@@ -57,14 +61,20 @@ graph TD
     %% Key Components
     SHARED --> ASSISTANT[WizardAssistant]
     SHARED --> DEBUG[DebugPanel]
+    SHARED --> FORMS[Form Controls]
     
-    %% State
+    %% State & Theme
     STORE[Pinia Store] --> |State| APP
+    THEME --> |Variables| FORMS
 ```
 
 ## File Structure
 ```
 src/
+├── css/
+│   ├── main.css                      # Global styles and theme variables
+│   └── form-controls.css             # Form control styles
+│
 └── js/
     ├── components/
     │   └── shared/                    # Shared components
@@ -82,9 +92,10 @@ src/
     │   ├── CurriculumWizard.vue
     │   └── onboardwizard/            # Onboarding wizard views
     │       ├── BaseWizardStep.vue    # Core navigation component
-    │       ├── OnboardEntry.vue
-    │       ├── CourseDetails.vue
-    │       └── ChooseStandards.vue
+    │       ├── OnboardEntry.vue      # Initial entry point
+    │       ├── CourseDetails.vue     # Course setup with form controls
+    │       ├── ChooseStandards.vue   # Standards selection
+    │       └── Wizard10Questions.vue  # AI-powered questionnaire
     │
     ├── stores/                        # State management
     │   └── store.js
@@ -92,13 +103,78 @@ src/
     ├── router/                        # Routing configuration
     │   └── index.js
     │
+    ├── config/                        # Application configuration
+    │   └── theme.js                   # Theme configuration
+    │
     ├── api/                          # API integrations
-    ├── config/                       # Application configuration
     ├── models/                       # Data models
     │   └── Request.js
     │
     ├── app.js                        # Application entry
     └── App.vue                       # Root component
+```
+
+## Recent Changes
+
+### Latest Commit (2024-03-XX)
+**Form Control Styling and Theme System Enhancements**
+
+Changes:
+- Enhanced form control styling with consistent placeholder colors
+- Added specific styling for number input placeholders in dark mode
+- Implemented browser-specific placeholder styles for maximum compatibility
+- Updated theme system documentation with edge case handling
+- Added CSS variables for consistent theming across components
+- Improved accessibility of form controls in dark mode
+
+Files Modified:
+- `src/css/form-controls.css`
+- `src/js/views/onboardwizard/CourseDetails.vue`
+- `README.md`
+
+Key Technical Details:
+- Added `.number-students` class for specific input styling
+- Implemented cross-browser placeholder color fixes
+- Used hardcoded colors (`#E4E6EB`) for consistent dark mode placeholders
+- Enhanced theme system documentation with practical examples
+
+## Theme System
+
+### Core Principles
+- Use CSS variables for consistent theming
+- Maintain dark/light mode compatibility
+- Allow component-specific overrides when necessary
+- Provide escape hatches for edge cases (e.g., hardcoded colors)
+
+### Implementation
+```css
+/* Base theme variables */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --border-color: #e5e7eb;
+}
+
+/* Dark mode overrides */
+.dark {
+  --bg-primary: #18191A;
+  --bg-secondary: #242526;
+  --text-primary: #E4E6EB;
+  --text-secondary: #B0B3B8;
+  --border-color: #3A3B3C;
+}
+```
+
+### Edge Cases
+Some components may require direct color values for maximum compatibility:
+```css
+/* Example: Number input placeholder in CourseDetails.vue */
+.wizard-section input[type="number"].form-input.number-students::placeholder {
+  color: #E4E6EB !important; /* Hardcoded for consistent appearance */
+  opacity: 1 !important;
+}
 ```
 
 ## WizardAssistant Architecture
