@@ -33,6 +33,9 @@ Another idea is auto grader
 - **Modular Design**: Each component and feature can be easily modified or removed
 - **Simple Over Complex**: Favor straightforward implementations unless complexity is justified
 - **Theme System**: Consistent theming with CSS variables, with escape hatches for edge cases
+- **Predictable Navigation**: All step transitions managed through store actions
+- **Theme Consistency**: Single source of truth for theme variables
+- **Debug First**: Built-in debugging capabilities for development
 
 ### Overall System
 ```mermaid
@@ -116,27 +119,35 @@ src/
 
 ## Recent Changes
 
-### Latest Commit (2024-03-XX)
-**Form Control Styling and Theme System Enhancements**
+### Latest Commits
 
-Changes:
-- Enhanced form control styling with consistent placeholder colors
-- Added specific styling for number input placeholders in dark mode
-- Implemented browser-specific placeholder styles for maximum compatibility
-- Updated theme system documentation with edge case handling
-- Added CSS variables for consistent theming across components
-- Improved accessibility of form controls in dark mode
+#### 2024-03-XX: Debug Panel and Navigation Enhancements
+- Made debug panel collapsed by default for cleaner UI
+- Enhanced state management with forced updates
+- Fixed navigation issues in standards selection
+- Improved theme consistency across components
+- Added documentation for routing and theme patterns
 
 Files Modified:
-- `src/css/form-controls.css`
-- `src/js/views/onboardwizard/CourseDetails.vue`
+- `src/js/components/shared/DebugPanel.vue`
+- `src/js/views/onboardwizard/ChooseStandards.vue`
+- `src/js/views/onboardwizard/ThinkingStep.vue`
+- `src/js/stores/store.js`
 - `README.md`
 
-Key Technical Details:
-- Added `.number-students` class for specific input styling
-- Implemented cross-browser placeholder color fixes
-- Used hardcoded colors (`#E4E6EB`) for consistent dark mode placeholders
-- Enhanced theme system documentation with practical examples
+#### 2024-03-XX: Thinking Step Integration
+- Added ThinkingView component for AI processing visualization
+- Integrated thinking step into wizard flow
+- Enhanced store navigation actions
+- Added loading state management
+- Implemented magic-themed loading animation
+
+#### 2024-03-XX: Navigation and Theme System Refinements
+- Centralized navigation in BaseWizardStep
+- Standardized theme variable usage
+- Reduced theme redundancy
+- Enhanced routing documentation
+- Improved debug state visibility
 
 ## Theme System
 
@@ -150,20 +161,27 @@ Key Technical Details:
 ```css
 /* Base theme variables */
 :root {
+  /* Core colors */
+  --primary-500: #4F46E5;
+  --success-500: #22C55E;
+  --error-500: #EF4444;
+  
+  /* Background and text */
   --bg-primary: #ffffff;
   --bg-secondary: #f9fafb;
   --text-primary: #111827;
   --text-secondary: #4b5563;
-  --border-color: #e5e7eb;
+  
+  /* Animations */
+  --duration-default: 200ms;
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Dark mode overrides */
-.dark {
-  --bg-primary: #18191A;
-  --bg-secondary: #242526;
-  --text-primary: #E4E6EB;
-  --text-secondary: #B0B3B8;
-  --border-color: #3A3B3C;
+/* Component usage */
+.component {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: var(--duration-default) var(--ease-default);
 }
 ```
 

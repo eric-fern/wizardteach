@@ -1,7 +1,5 @@
 <template>
   <BaseWizardStep
-    title="10 Questions About Your Class"
-    subtitle="Help me understand your teaching needs (Step 4 of 5)"
     :is-valid="isValid"
     @next="handleNext"
     @prev="handlePrev"

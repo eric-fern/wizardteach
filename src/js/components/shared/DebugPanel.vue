@@ -1,3 +1,13 @@
+/**
+ * DebugPanel Component
+ * 
+ * A development tool that provides real-time visibility into the application state.
+ * Features:
+ * - Collapsible sections for navigation, form data, and validation
+ * - Persistent visibility state through localStorage
+ * - Forced store updates to ensure consistent state display
+ * - Theme-consistent styling with CSS variables
+ */
 <template>
   <div>
     <!-- Debug Toggle -->
@@ -255,9 +265,9 @@ const store = useStore();
 // UI State
 const isDebugVisible = ref(false);
 const expandedSections = ref({
-  navigation: true,
-  formData: true,
-  validation: true
+  navigation: false,
+  formData: false,
+  validation: false
 });
 const expandedPaths = ref(new Set());
 
@@ -295,6 +305,9 @@ const filteredFormData = computed(() => {
 const toggleDebug = () => {
   localStorage.setItem('debugPanelVisible', isDebugVisible.value);
   store.setDebugMode(isDebugVisible.value);
+  
+  // Force a re-render of the debug state
+  store.updateDebugState();
 };
 
 const toggleSection = (section) => {
@@ -337,6 +350,9 @@ onMounted(() => {
   const savedState = localStorage.getItem('debugPanelVisible');
   isDebugVisible.value = savedState === 'true';
   store.setDebugMode(isDebugVisible.value);
+  
+  // Initial debug state update
+  store.updateDebugState();
 });
 </script>
 

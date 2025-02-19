@@ -1,4 +1,20 @@
-# New file content
+/**
+ * ChooseStandards Component
+ * 
+ * Allows teachers to select their educational standards:
+ * - Common Core
+ * - State Standards (with state selection)
+ * - Custom Standards (with file upload)
+ * 
+ * Navigation:
+ * - Previous: Course Details
+ * - Next: Thinking (AI Processing)
+ * 
+ * State Management:
+ * - Updates store with selected standards type
+ * - Handles file upload for custom standards
+ * - Validates selection before allowing navigation
+ */
 <template>
   <BaseWizardStep
     title="Choose Your Standards"
@@ -118,6 +134,7 @@ const store = useStore()
 const selectedType = ref(store.formData.standards.selectedType)
 const selectedState = ref(store.formData.standards.state)
 const router = useRouter()
+const emit = defineEmits(['next', 'prev'])
 
 // Initialize from store on mount
 onMounted(() => {
@@ -135,7 +152,9 @@ const handleNext = () => {
   if (selectedType.value === 'custom') {
     store.setPdfType('standards')
   }
-  router.push('/onboard/questions')
+  
+  // Emit next event to BaseWizardStep
+  emit('next')
 }
 
 // Watch for state selection

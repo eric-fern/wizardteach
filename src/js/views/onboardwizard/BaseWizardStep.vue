@@ -158,16 +158,19 @@ const handleNext = () => {
     const nextStep = store.currentStep + 1;
     switch(nextStep) {
       case 1:
-        router.push('/onboard/course-details');
+        router.push('/onboard/course-details');  // From Entry to Course Details
         break;
       case 2:
-        router.push('/onboard/standards');
+        router.push('/onboard/standards');       // From Course Details to Standards
         break;
       case 3:
-        router.push('/onboard/questions');
+        router.push('/onboard/thinking');        // From Standards to Thinking
         break;
       case 4:
-        router.push('/create');
+        router.push('/onboard/questions');       // From Thinking to Questions
+        break;
+      case 5:
+        router.push('/create');                  // From Questions to Review
         break;
     }
   }
@@ -191,16 +194,19 @@ const handlePrev = () => {
     const prevStep = store.currentStep - 1;
     switch(prevStep) {
       case 0:
-        router.push('/');
+        router.push('/');                        // Back to Entry
         break;
       case 1:
-        router.push('/onboard/course-details');
+        router.push('/onboard/course-details');  // Back to Course Details
         break;
       case 2:
-        router.push('/onboard/standards');
+        router.push('/onboard/standards');       // Back to Standards
         break;
       case 3:
-        router.push('/onboard/questions');
+        router.push('/onboard/thinking');        // Back to Thinking
+        break;
+      case 4:
+        router.push('/onboard/questions');       // Back to Questions
         break;
     }
   }

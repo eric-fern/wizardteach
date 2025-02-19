@@ -9,7 +9,6 @@
   <div class="mb-8 border-2 border-dashed rounded-xl p-4 transition-colors duration-200"
        :style="{
          borderColor: 'var(--primary-300)',
-         backgroundColor: 'var(--primary-50)'
        }">
     <div class="flex flex-wrap gap-2">
       <template v-for="(field, key) in displayFields" :key="key">

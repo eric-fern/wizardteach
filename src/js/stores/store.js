@@ -9,21 +9,24 @@ import router from '../router';  // Direct import instead of useRouter hook
  * - Form data management
  * - Debug mode and validation
  * - Reference data for dropdowns/labels
+ * - Loading state for AI operations
  */
 export const useStore = defineStore('store', {
   state: () => ({
     // UI State Management
     currentStep: 0,  // Tracks current position in wizard flow
+    isLoading: false, // Tracks AI loading state
     
     /**
      * Wizard Flow Steps
      * 0: Entry - Initial subject selection
      * 1: Course Details - Age range, duration, dates
      * 2: Standards - Educational standards selection
-     * 3: Questions - Teaching style and preferences
-     * 4: Review - Final review before generation
+     * 3: Thinking - AI Processing
+     * 4: Questions - Teaching style and preferences
+     * 5: Review - Final review before generation
      */
-    steps: ['Entry', 'Course Details', 'Standards', 'Questions', 'Review'],
+    steps: ['Entry', 'Course Details', 'Standards', 'Thinking', 'Questions', 'Review'],
     
     isDebugMode: false,  // Controls debug panel visibility
     
@@ -325,9 +328,12 @@ export const useStore = defineStore('store', {
             router.push('/onboard/standards');       // From Course Details to Standards
             break;
           case 3:
-            router.push('/onboard/questions');         // From Standards to Questions
+            router.push('/onboard/thinking');        // From Standards to Thinking
             break;
           case 4:
+            router.push('/onboard/questions');       // From Thinking to Questions
+            break;
+          case 5:
             router.push('/create');                  // From Questions to Review
             break;
         }
@@ -350,7 +356,10 @@ export const useStore = defineStore('store', {
             router.push('/onboard/standards');       // Back to Standards
             break;
           case 3:
-            router.push('/onboard/questions');         // Back to Questions
+            router.push('/onboard/thinking');        // Back to Thinking
+            break;
+          case 4:
+            router.push('/onboard/questions');       // Back to Questions
             break;
         }
       }
@@ -360,8 +369,13 @@ export const useStore = defineStore('store', {
      * Debug Mode Management
      * Toggles visibility of the debug panel and enables debug features
      */
-    setDebugMode(enabled) {
-      this.isDebugMode = enabled;
+    setDebugMode(isDebug) {
+      this.isDebugMode = isDebug;
+    },
+
+    updateDebugState() {
+      // Force a reactive update of the debug state
+      this.isDebugMode = this.isDebugMode;
     },
 
     /**
@@ -479,6 +493,14 @@ export const useStore = defineStore('store', {
     setCurrentStep(step) {
       console.log('Store: Setting current step from', this.currentStep, 'to', step);
       this.currentStep = step;
+    },
+
+    /**
+     * Loading State Management
+     * Controls the visibility of the thinking view
+     */
+    setLoadingState(isLoading) {
+      this.isLoading = isLoading;
     }
   },
 
