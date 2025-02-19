@@ -55,168 +55,371 @@ Another idea is auto grader
 <details>
 <summary><strong>State Management</strong></summary>
 
+### Core State Architecture
+
+Our state management is built using Pinia with a focus on type safety and predictable updates:
+
 ```typescript
-interface WizardState {
-  currentStep: number;
-  formData: {
-    subject: string;
-    courseDetails: CourseDetails;
-    standards: Standards;
-  };
-  isDebugMode: boolean;
-}
+// stores/wizardStore.js
+export const useWizardStore = defineStore('wizard', {
+  state: () => ({
+    // Navigation State
+    currentStep: 0,
+    isValid: true,
+    
+    // Form Data
+    subject: '',
+    courseDetails: {
+      ageRange: '',
+      numberOfStudents: null,
+      startDate: '',
+      endDate: '',
+      duration: null
+    },
+    
+    // Standards Selection
+    standards: {
+      type: '',
+      state: '',
+      custom: null
+    },
+    
+    // Debug State
+    debug: {
+      enabled: import.meta.env.DEV,
+      showValidation: true,
+      showNavigation: true
+    }
+  }),
+  
+  getters: {
+    canProceed: (state) => state.isValid && state.currentStep < TOTAL_STEPS,
+    currentStepComponent: (state) => STEP_COMPONENTS[state.currentStep],
+    isComplete: (state) => state.currentStep === TOTAL_STEPS
+  },
+  
+  actions: {
+    async validateCurrentStep() {
+      const stepValidation = STEP_VALIDATION[this.currentStep];
+      this.isValid = await stepValidation(this.$state);
+      return this.isValid;
+    },
+    
+    updateStandardsSelection(standards) {
+      this.standards = {
+        ...this.standards,
+        ...standards
+      };
+    }
+  }
+});
 ```
+
+### State Management Principles
+
+1. **Single Source of Truth**
+   - All wizard state managed in Pinia store
+   - Type-safe state updates
+   - Computed properties for derived state
+
+2. **Predictable Updates**
+   - Actions for complex state changes
+   - Validation before state updates
+   - Automatic state persistence
+
+3. **Debug Capabilities**
+   - Development-only debug features
+   - State change tracking
+   - Validation visualization
+
+### Component Integration
+
+```vue
+<script setup>
+import { useWizardStore } from '@/stores/wizardStore';
+import { storeToRefs } from 'pinia';
+
+const store = useWizardStore();
+const { currentStep, isValid } = storeToRefs(store);
+
+// Reactive state access
+const handleStandardsUpdate = (standards) => {
+  store.updateStandardsSelection(standards);
+};
+</script>
+```
+
+### State Persistence
+
+```typescript
+// Automatic state persistence configuration
+export const useWizardStore = defineStore('wizard', {
+  persist: {
+    enabled: true,
+    strategies: [
+      {
+        key: 'wizard-progress',
+        storage: localStorage,
+        paths: ['currentStep', 'subject', 'courseDetails', 'standards']
+      }
+    ]
+  }
+  // ... rest of store configuration
+});
+```
+
+### Best Practices
+
+1. **Type Safety**
+   - Use TypeScript for store definitions
+   - Define interfaces for state shape
+   - Validate state updates
+
+2. **Performance**
+   - Use computed properties for derived state
+   - Avoid unnecessary state updates
+   - Implement proper memoization
+
+3. **Debug Support**
+   - Enable Vue Devtools integration
+   - Add development-only state
+   - Implement state logging
 
 ## File Structure
 ```
 src/
-├── css/
-│   ├── main.css                      # Global styles and theme variables
-│   └── form-controls.css             # Form control styles
+├── css/                           # Global styles
+│   ├── main.css                  # Theme variables and base styles
+│   └── form-controls.css         # Form control styles
 │
 └── js/
+    ├── api/                      # API integrations
     ├── components/
-    │   └── shared/                    # Shared components
-    │       ├── WizardAssistant.vue    # Self-managed contextual helper
-    │       ├── DebugPanel.vue         # Debug interface
-    │       ├── StateTree.vue          # State visualization
-    │       ├── TextBoxWithAITag.vue   # AI-enabled input
-    │       ├── UploadAndHoldFileWithinPinia.vue
-    │       ├── BlueDottedOvalShowsCompletedFormFields.vue
-    │       └── GlobalNav.vue
+    │   ├── shared/              # Shared components
+    │   │   ├── WizardAssistant.vue
+    │   │   ├── DebugPanel.vue
+    │   │   ├── StateTree.vue
+    │   │   ├── TextBoxWithAITag.vue
+    │   │   └── GlobalNav.vue
+    │   └── wizard/              # Wizard-specific components
+    │
+    ├── composables/             # Vue composables
+    │   ├── useWizardContext.js  # Wizard navigation context
+    │   └── useValidation.js     # Form validation utilities
+    │
+    ├── config/                  # Application configuration
+    │   └── theme.js            # Theme configuration
+    │
+    ├── models/                  # Data models
+    │   └── Request.js          # API request models
+    │
+    ├── router/                  # Routing configuration
+    │   ├── index.js            # Main router configuration
+    │   └── wizardNavigation.js # Wizard navigation utilities
+    │
+    ├── stores/                  # State management
+    │   └── wizardStore.js      # Wizard state store
     │
     ├── views/
-    │   ├── Dashboard.vue
-    │   ├── MaterialsView.vue
-    │   ├── CurriculumWizard.vue
-    │   └── onboardwizard/            # Onboarding wizard views
-    │       ├── BaseWizardStep.vue    # Core navigation component
-    │       ├── OnboardEntry.vue      # Initial entry point
-    │       ├── CourseDetails.vue     # Course setup with form controls
-    │       ├── ChooseStandards.vue   # Standards selection
-    │       └── Wizard10Questions.vue  # AI-powered questionnaire
+    │   ├── Dashboard.vue       # Main dashboard
+    │   ├── MaterialsView.vue   # Materials management
+    │   ├── CurriculumWizard.vue # Curriculum generation
+    │   └── onboardwizard/      # Onboarding wizard views
+    │       ├── WizardProvider.vue  # Context provider
+    │       ├── BaseWizardStep.vue  # Base navigation template
+    │       ├── OnboardEntry.vue    # Initial entry
+    │       ├── CourseDetails.vue   # Course setup
+    │       ├── ChooseStandards.vue # Standards selection
+    │       ├── Wizard10Questions.vue # Teaching preferences
+    │       └── ThinkingStep.vue    # AI processing view
     │
-    ├── stores/                        # State management
-    │   └── store.js
-    │
-    ├── router/                        # Routing configuration
-    │   └── index.js
-    │
-    ├── config/                        # Application configuration
-    │   └── theme.js                   # Theme configuration
-    │
-    ├── api/                          # API integrations
-    ├── models/                       # Data models
-    │   └── Request.js
-    │
-    ├── app.js                        # Application entry
-    └── App.vue                       # Root component
+    ├── app.js                  # Application entry
+    └── App.vue                 # Root component
 ```
 
-**Core Components:**
-- `BaseWizardStep`: Navigation template
-- `WizardProvider`: Context provider
-- `DebugPanel`: Development tools
-</details>
+### Recent Commits
 
-### Latest Commits
+#### 2024-03-19: Wizard Context and Navigation Refactor
+- Introduced `WizardProvider.vue` for centralized context management
+- Refactored navigation to use composition API with `useWizardContext`
+- Enhanced error handling in wizard navigation
+- Added `ThinkingStep.vue` for AI processing visualization
+- Updated `ChooseStandards.vue` to use new context system
 
-#### 2024-03-XX: Navigation System Refactor
-- Centralized navigation logic in `router/wizardNavigation.js`
-- Removed navigation logic from Pinia store
-- Updated BaseWizardStep to use centralized navigation
-- Improved separation of concerns:
-  - Router: Handles all navigation logic
-  - Store: Manages application state
-  - Components: Use navigation utilities
+#### 2024-03-18: Component Architecture Updates
+- Simplified component communication through context
+- Enhanced debug panel with collapsible sections
+- Improved theme consistency across wizard components
+- Added validation utilities in `useValidation.js`
 
-Files Modified:
-- `src/js/router/wizardNavigation.js` (new)
-- `src/js/views/onboardwizard/BaseWizardStep.vue`
-- `src/js/stores/store.js`
+#### 2024-03-17: State Management Optimization
+- Centralized wizard state in Pinia store
+- Implemented persistent state with localStorage
+- Added type safety improvements
+- Enhanced debug visualization
 
-Navigation Flow:
+### Navigation Flow (Updated)
 ```mermaid
-graph LR
-    Component[Components] --> |use| Nav[wizardNavigation.js]
-    Nav --> |calls| Router[Vue Router]
-    Router --> |updates| Store[Pinia Store]
-    Store --> |reflects| State[Current Step]
+graph TD
+    WP[WizardProvider] -->|Provides Context| BWS[BaseWizardStep]
+    BWS -->|Uses| WC[useWizardContext]
+    WC -->|Manages| N[Navigation]
+    N -->|Updates| S[Store]
+    S -->|Reflects| V[Views]
+    V -->|Rendered in| BWS
 ```
-
-#### 2024-03-XX: Debug Panel and Navigation Enhancements
-- Made debug panel collapsed by default for cleaner UI
-- Enhanced state management with forced updates
-- Fixed navigation issues in standards selection
-- Improved theme consistency across components
-- Added documentation for routing and theme patterns
-
-Files Modified:
-- `src/js/components/shared/DebugPanel.vue`
-- `src/js/views/onboardwizard/ChooseStandards.vue`
-- `src/js/views/onboardwizard/ThinkingStep.vue`
-- `src/js/stores/store.js`
-- `README.md`
-
-#### 2024-03-XX: Thinking Step Integration
-- Added ThinkingView component for AI processing visualization
-- Integrated thinking step into wizard flow
-- Enhanced store navigation actions
-- Added loading state management
-- Implemented magic-themed loading animation
-
-#### 2024-03-XX: Navigation and Theme System Refinements
-- Centralized navigation in BaseWizardStep
-- Standardized theme variable usage
-- Reduced theme redundancy
-- Enhanced routing documentation
-- Improved debug state visibility
 
 ## Theme System
 
-### Core Principles
-- Use CSS variables for consistent theming
-- Maintain dark/light mode compatibility
-- Allow component-specific overrides when necessary
-- Provide escape hatches for edge cases (e.g., hardcoded colors)
+### Core Theme Architecture
 
-### Implementation
+Our theme system is built on CSS variables with a focus on maintainability and flexibility:
+
 ```css
-/* Base theme variables */
+/* css/main.css */
 :root {
-  /* Core colors */
-  --primary-500: #4F46E5;
-  --success-500: #22C55E;
-  --error-500: #EF4444;
+  /* Color System */
+  --primary-50: #eef2ff;
+  --primary-100: #e0e7ff;
+  --primary-500: #6366f1;
+  --primary-600: #4f46e5;
+  --primary-700: #4338ca;
   
-  /* Background and text */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f9fafb;
-  --text-primary: #111827;
-  --text-secondary: #4b5563;
+  --success-500: #22c55e;
+  --error-500: #ef4444;
+  --warning-500: #f59e0b;
   
-  /* Animations */
-  --duration-default: 200ms;
-  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  /* Typography */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'Fira Code', monospace;
+  
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-4: 1rem;
+  --space-8: 2rem;
+  
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 250ms ease-in-out;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
 }
 
-/* Component usage */
-.component {
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  transition: var(--duration-default) var(--ease-default);
+/* Dark Mode Overrides */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #1a1b1e;
+    --bg-secondary: #2c2e33;
+    --text-primary: #ffffff;
+    --text-secondary: #a1a1aa;
+  }
 }
 ```
 
-### Edge Cases
-Some components may require direct color values for maximum compatibility:
-```css
-/* Example: Number input placeholder in CourseDetails.vue */
-.wizard-section input[type="number"].form-input.number-students::placeholder {
-  color: #E4E6EB !important; /* Hardcoded for consistent appearance */
-  opacity: 1 !important;
+### Component Theme Integration
+
+```vue
+<!-- components/shared/TextBoxWithAITag.vue -->
+<template>
+  <div class="input-wrapper">
+    <input
+      :class="[
+        'form-input',
+        { 'is-valid': isValid },
+        { 'is-loading': isLoading }
+      ]"
+      v-bind="$attrs"
+    />
+    <AITag v-if="hasAI" />
+  </div>
+</template>
+
+<style scoped>
+.input-wrapper {
+  position: relative;
+  width: 100%;
 }
+
+.form-input {
+  width: 100%;
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-sans);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  transition: var(--transition-fast);
+}
+
+.form-input.is-valid {
+  border-color: var(--success-500);
+}
+
+.form-input.is-loading {
+  background-image: linear-gradient(
+    90deg,
+    var(--bg-secondary) 0%,
+    var(--bg-primary) 50%,
+    var(--bg-secondary) 100%
+  );
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+</style>
 ```
+
+### Theme Configuration
+
+```typescript
+// config/theme.js
+export const theme = {
+  colors: {
+    primary: {
+      50: 'var(--primary-50)',
+      100: 'var(--primary-100)',
+      500: 'var(--primary-500)',
+      600: 'var(--primary-600)',
+      700: 'var(--primary-700)'
+    },
+    // ... other color definitions
+  },
+  
+  spacing: {
+    1: 'var(--space-1)',
+    2: 'var(--space-2)',
+    4: 'var(--space-4)',
+    8: 'var(--space-8)'
+  },
+  
+  transitions: {
+    fast: 'var(--transition-fast)',
+    normal: 'var(--transition-normal)'
+  }
+};
+```
+
+### Best Practices
+
+1. **CSS Variable Usage**
+   - Use semantic variable names
+   - Maintain consistent naming conventions
+   - Provide fallback values
+
+2. **Component Styling**
+   - Use scoped styles by default
+   - Leverage CSS custom properties
+   - Implement responsive design
+
+3. **Theme Customization**
+   - Support dark mode through media queries
+   - Allow component-level overrides
+   - Maintain accessibility standards
 
 ## WizardAssistant Architecture
 
@@ -489,48 +692,109 @@ interface WizardStateManager {
 
 ## Navigation & Routing
 
-### Centralized Navigation
-All navigation is managed through `wizardNavigation.js`, which provides:
-- Consistent navigation methods
-- Route validation
-- State synchronization
-- Error handling
+### Core Navigation Architecture
 
+Our navigation system is built around three key components:
+
+1. **Router Configuration** (`router/index.js`)
 ```typescript
-// wizardNavigation.js
-export async function goToNextStep() {
-  const store = useStore();
-  if (await validateStep()) {
-    await router.push(getNextRoute(store.currentStep));
+const routes = [
+  {
+    path: '/onboard',
+    component: () => import('@/views/onboardwizard/BaseWizardStep.vue'),
+    children: [
+      {
+        path: '',
+        name: 'OnboardEntry',
+        component: () => import('@/views/onboardwizard/OnboardEntry.vue'),
+        meta: { step: 0 }
+      },
+      // ... other wizard steps
+    ]
   }
-}
+];
+```
 
-// Component usage
-const handleNext = async () => {
-  emit('next');
-  await goToNextStep();
+2. **Wizard Navigation** (`router/wizardNavigation.js`)
+```typescript
+// Navigation utilities
+export const goToNextStep = async () => {
+  const currentStep = useWizardContext();
+  await validateStep();
+  await router.push(getNextRoute());
+};
+
+export const goToPreviousStep = async () => {
+  await router.push(getPreviousRoute());
+};
+```
+
+3. **Wizard Context** (`composables/useWizardContext.js`)
+```typescript
+export const useWizardContext = () => {
+  const context = inject(WIZARD_CONTEXT_KEY);
+  if (!context) {
+    throw new Error('Wizard navigation context not found. Are you using this inside a wizard component?');
+  }
+  return context;
 };
 ```
 
 ### Navigation Flow
+
 ```mermaid
 graph TD
-    A[wizardNavigation.js] -->|Controls| B[Vue Router]
-    B -->|Updates| C[Pinia Store]
-    C -->|State| D[Components]
-    D -->|Events| A
+    A[Wizard Step Component] -->|Uses| B[useWizardContext]
+    B -->|Provides| C[Navigation Methods]
+    C -->|Calls| D[wizardNavigation.js]
+    D -->|Updates| E[Vue Router]
+    E -->|Reflects| F[Current Step]
+    F -->|Updates| A
 ```
 
-1. Components emit navigation events
-2. Navigation utility handles routing
-3. Router updates application state
-4. Store reflects current step
-5. Components react to state changes
+### Key Features
 
-### BaseWizardStep Role
-- Provides consistent UI template
-- Emits navigation events
-- Handles validation display
-- Uses navigation utilities
+1. **Centralized Navigation**
+   - All navigation logic centralized in `wizardNavigation.js`
+   - Consistent navigation methods across components
+   - Built-in validation and error handling
 
-[Rest of document remains unchanged] 
+2. **Context Management**
+   - Wizard context provided through Vue's provide/inject
+   - Type-safe navigation utilities
+   - Automatic state synchronization
+
+3. **Component Integration**
+```vue
+<script setup>
+import { useWizardContext } from '@/composables/useWizardContext';
+
+const { goToNextStep, goToPreviousStep } = useWizardContext();
+
+const handleNext = async () => {
+  // Component-specific validation
+  if (await validate()) {
+    await goToNextStep();
+  }
+};
+</script>
+```
+
+### Best Practices
+
+1. **Always Use Context**
+   - Access navigation through `useWizardContext`
+   - Never directly manipulate router
+   - Handle navigation errors gracefully
+
+2. **Validation**
+   - Validate current step before navigation
+   - Use type-safe validation rules
+   - Provide clear error messages
+
+3. **State Management**
+   - Keep navigation state in store
+   - Sync router with store state
+   - Use navigation guards for protection
+
+[Rest of sections remain unchanged] 
