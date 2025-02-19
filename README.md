@@ -12,7 +12,11 @@ Clicking on a day will bring up a lesson outline meant to be a reference for the
 
 There will be a wizard ai agent in the bottom left corner that a teacher can chat with, you can ask for it to change your week
 
-Basic generation is free (assessments, homework, activities) , advanced generation is in the premium tier (Powerpoints, study guides, flash cards).  
+- Initial wizard flow for course setup
+- Standards selection and validation
+- Basic lesson plan generation
+- Development tools and debugging
+</details>
 
 Each day will have a standards check section which explains in depth how that days instruction meets with state or common core standards (would be nice to have an evaluator rubric, but thats complicated and lets not worry about it until later.)
 
@@ -26,49 +30,41 @@ Another idea is auto grader
 ## System Architecture
 
 ### Core Architecture Principles
-- **Centralized Navigation**: All wizard step navigation is managed by `BaseWizardStep`
-- **State Management**: Pinia store with predictable state updates and debug capabilities
-- **Component Reusability**: Shared components for common functionality
-- **Self-Contained Components**: Components like `WizardAssistant` manage their own visibility and state
-- **Modular Design**: Each component and feature can be easily modified or removed
-- **Simple Over Complex**: Favor straightforward implementations unless complexity is justified
-- **Theme System**: Consistent theming with CSS variables, with escape hatches for edge cases
-- **Predictable Navigation**: All step transitions managed through store actions
-- **Theme Consistency**: Single source of truth for theme variables
-- **Debug First**: Built-in debugging capabilities for development
+- **Centralized Navigation**: All navigation managed by `wizardNavigation.js`
+- **Decoupled Components**: Steps only emit events, don't handle navigation
+- **Single Source of Truth**: Navigation state managed in Pinia store
+- **Predictable Flow**: All transitions handled through navigation utilities
+- **Debug First**: Built-in debugging and validation tracking
 
-### Overall System
-```mermaid
-graph LR
-    UI[Vue Frontend] -->|State| Store[Pinia Store]
-    UI -->|Navigation| Router[Vue Router]
-    UI -->|Theme| Theme[Theme System]
-    Store -->|Debug| Debug[Debug Panel]
-    Router -->|Guard| Nav[Navigation Control]
-    Nav -->|Sync| Store
-    Theme -->|Variables| Components[Components]
+    subgraph "WizardProvider Context"
+        A
+        B
+        C
+        D
+    end
 ```
 
-### Frontend Architecture
-```mermaid
-graph TD
-    %% Core Application
-    APP[App.vue] --> ROUTER[Vue Router]
-    ROUTER --> VIEWS[Views]
-    APP --> THEME[Theme System]
-    
-    %% Main Views & Components
-    VIEWS --> WIZARD[Wizard Steps]
-    APP --> SHARED[Shared Components]
-    
-    %% Key Components
-    SHARED --> ASSISTANT[WizardAssistant]
-    SHARED --> DEBUG[DebugPanel]
-    SHARED --> FORMS[Form Controls]
-    
-    %% State & Theme
-    STORE[Pinia Store] --> |State| APP
-    THEME --> |Variables| FORMS
+**Flow Explanation:**
+1. `OnboardEntry`: Subject selection
+2. `CourseDetails`: Course setup (age range, dates, duration)
+3. `ChooseStandards`: Educational standards selection
+4. `Wizard10Questions`: Teaching preferences
+5. `CurriculumWizard`: Content generation
+</details>
+
+<details>
+<summary><strong>State Management</strong></summary>
+
+```typescript
+interface WizardState {
+  currentStep: number;
+  formData: {
+    subject: string;
+    courseDetails: CourseDetails;
+    standards: Standards;
+  };
+  isDebugMode: boolean;
+}
 ```
 
 ## File Structure
@@ -117,9 +113,36 @@ src/
     └── App.vue                       # Root component
 ```
 
-## Recent Changes
+**Core Components:**
+- `BaseWizardStep`: Navigation template
+- `WizardProvider`: Context provider
+- `DebugPanel`: Development tools
+</details>
 
 ### Latest Commits
+
+#### 2024-03-XX: Navigation System Refactor
+- Centralized navigation logic in `router/wizardNavigation.js`
+- Removed navigation logic from Pinia store
+- Updated BaseWizardStep to use centralized navigation
+- Improved separation of concerns:
+  - Router: Handles all navigation logic
+  - Store: Manages application state
+  - Components: Use navigation utilities
+
+Files Modified:
+- `src/js/router/wizardNavigation.js` (new)
+- `src/js/views/onboardwizard/BaseWizardStep.vue`
+- `src/js/stores/store.js`
+
+Navigation Flow:
+```mermaid
+graph LR
+    Component[Components] --> |use| Nav[wizardNavigation.js]
+    Nav --> |calls| Router[Vue Router]
+    Router --> |updates| Store[Pinia Store]
+    Store --> |reflects| State[Current Step]
+```
 
 #### 2024-03-XX: Debug Panel and Navigation Enhancements
 - Made debug panel collapsed by default for cleaner UI
@@ -463,3 +486,51 @@ interface WizardStateManager {
   canGenerate(): boolean;
 }
 ``` 
+
+## Navigation & Routing
+
+### Centralized Navigation
+All navigation is managed through `wizardNavigation.js`, which provides:
+- Consistent navigation methods
+- Route validation
+- State synchronization
+- Error handling
+
+```typescript
+// wizardNavigation.js
+export async function goToNextStep() {
+  const store = useStore();
+  if (await validateStep()) {
+    await router.push(getNextRoute(store.currentStep));
+  }
+}
+
+// Component usage
+const handleNext = async () => {
+  emit('next');
+  await goToNextStep();
+};
+```
+
+### Navigation Flow
+```mermaid
+graph TD
+    A[wizardNavigation.js] -->|Controls| B[Vue Router]
+    B -->|Updates| C[Pinia Store]
+    C -->|State| D[Components]
+    D -->|Events| A
+```
+
+1. Components emit navigation events
+2. Navigation utility handles routing
+3. Router updates application state
+4. Store reflects current step
+5. Components react to state changes
+
+### BaseWizardStep Role
+- Provides consistent UI template
+- Emits navigation events
+- Handles validation display
+- Uses navigation utilities
+
+[Rest of document remains unchanged] 

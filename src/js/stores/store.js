@@ -306,76 +306,13 @@ export const useStore = defineStore('store', {
 
   actions: {
     /**
-     * Navigation Actions
-     * Uses router for navigation to maintain sync between
-     * router state and store state
-     * 
-     * Navigation Flow:
-     * / (Entry) -> /onboard/course-details -> /onboard/standards -> /create
-     * 
-     * Each navigation updates both the router and store state to maintain
-     * a single source of truth for the current step.
+     * Step Management
+     * Only manages the currentStep state
+     * Actual navigation is handled by the router
      */
-    nextStep() {
-      console.log('Next step called, current step:', this.currentStep);
-      if (this.currentStep < this.steps.length - 1) {
-        const nextStep = this.currentStep + 1;
-        switch(nextStep) {
-          case 1:
-            router.push('/onboard/course-details');  // From Entry to Course Details
-            break;
-          case 2:
-            router.push('/onboard/standards');       // From Course Details to Standards
-            break;
-          case 3:
-            router.push('/onboard/thinking');        // From Standards to Thinking
-            break;
-          case 4:
-            router.push('/onboard/questions');       // From Thinking to Questions
-            break;
-          case 5:
-            router.push('/create');                  // From Questions to Review
-            break;
-        }
-      }
-    },
-
-    prevStep() {
-      console.log('Prev step called, current step:', this.currentStep);
-      if (this.currentStep > 0) {
-        const prevStep = this.currentStep - 1;
-        console.log('Going to previous step:', prevStep);
-        switch(prevStep) {
-          case 0:
-            router.push('/');                        // Back to Entry
-            break;
-          case 1:
-            router.push('/onboard/course-details');  // Back to Course Details
-            break;
-          case 2:
-            router.push('/onboard/standards');       // Back to Standards
-            break;
-          case 3:
-            router.push('/onboard/thinking');        // Back to Thinking
-            break;
-          case 4:
-            router.push('/onboard/questions');       // Back to Questions
-            break;
-        }
-      }
-    },
-
-    /**
-     * Debug Mode Management
-     * Toggles visibility of the debug panel and enables debug features
-     */
-    setDebugMode(isDebug) {
-      this.isDebugMode = isDebug;
-    },
-
-    updateDebugState() {
-      // Force a reactive update of the debug state
-      this.isDebugMode = this.isDebugMode;
+    setCurrentStep(step) {
+      console.log('Store: Setting current step from', this.currentStep, 'to', step);
+      this.currentStep = step;
     },
 
     /**
@@ -394,6 +331,19 @@ export const useStore = defineStore('store', {
       } else {
         this.formData[path] = value;
       }
+    },
+
+    /**
+     * Debug Mode Management
+     * Toggles visibility of the debug panel and enables debug features
+     */
+    setDebugMode(isDebug) {
+      this.isDebugMode = isDebug;
+    },
+
+    updateDebugState() {
+      // Force a reactive update of the debug state
+      this.isDebugMode = this.isDebugMode;
     },
 
     /**
@@ -487,12 +437,6 @@ export const useStore = defineStore('store', {
           uploadDate: null
         }
       };
-    },
-
-    // Add step tracking
-    setCurrentStep(step) {
-      console.log('Store: Setting current step from', this.currentStep, 'to', step);
-      this.currentStep = step;
     },
 
     /**

@@ -7,6 +7,7 @@ import Wizard10Questions from '../views/onboardwizard/Wizard10Questions.vue';
 import CurriculumWizard from '../views/CurriculumWizard.vue';
 import Dashboard from '../views/Dashboard.vue';
 import MaterialsView from '../views/MaterialsView.vue';
+import WizardProvider from '../views/onboardwizard/WizardProvider.vue';
 
 /**
  * Router Configuration
@@ -21,36 +22,46 @@ import MaterialsView from '../views/MaterialsView.vue';
  */
 const routes = [
   {
+    path: '/onboard',
+    component: WizardProvider,
+    children: [
+      {
+        path: '',
+        name: 'Home',
+        component: OnboardEntry,
+        meta: { 
+          step: 0,
+        }
+      },
+      {
+        path: 'course-details',
+        name: 'CourseDetails',
+        component: CourseDetails,
+        meta: { 
+          step: 1,
+        }
+      },
+      {
+        path: 'standards',
+        name: 'ChooseStandards',
+        component: ChooseStandards,
+        meta: { 
+          step: 2,
+        }
+      },
+      {
+        path: 'questions',
+        name: 'Wizard10Questions',
+        component: Wizard10Questions,
+        meta: {
+          step: 3,
+        }
+      }
+    ]
+  },
+  {
     path: '/',
-    name: 'Home',
-    component: OnboardEntry,
-    meta: { 
-      step: 0,  // Entry point of wizard
-    }
-  },
-  {
-    path: '/onboard/course-details',
-    name: 'CourseDetails',
-    component: CourseDetails,
-    meta: { 
-      step: 1,  // Course details step
-    }
-  },
-  {
-    path: '/onboard/standards',
-    name: 'ChooseStandards',
-    component: ChooseStandards,
-    meta: { 
-      step: 2,  // Standards selection step
-    }
-  },
-  {
-    path: '/onboard/questions',
-    name: 'Wizard10Questions',
-    component: Wizard10Questions,
-    meta: {
-      step: 3,  // Questions step
-    }
+    redirect: '/onboard'
   },
   {
     path: '/create',
@@ -93,23 +104,34 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const store = useStore();
   
+  console.log('Navigation guard triggered:', {
+    to: to.path,
+    from: from.path,
+    currentStep: store.currentStep,
+    subject: store.formData.subject,
+    toMeta: to.meta
+  });
+  
   // Protection against page refreshes and direct URL access
-  // Forces users to start from the entry page if they haven't entered a subject
-  if (to.path.startsWith('/onboard') && !store.formData.subject) {
-    console.log('No subject found, redirecting to entry');
-    next('/');
+  if (to.path.startsWith('/onboard') && !store.formData.subject && to.path !== '/onboard') {
+    console.warn('No subject found, redirecting to entry');
+    next('/onboard');
     return;
   }
 
   // Sync route meta step with store
-  // This keeps the store's currentStep in sync with the actual route
   if (typeof to.meta.step !== 'undefined') {
     try {
-      console.log('Current store step:', store.currentStep, 'Changing to:', to.meta.step);
-      store.currentStep = to.meta.step;
+      console.log('Updating store step:', {
+        from: store.currentStep,
+        to: to.meta.step
+      });
+      store.setCurrentStep(to.meta.step);
     } catch (error) {
-      console.error('Error in navigation guard:', error);
+      console.error('Error updating store step:', error);
     }
+  } else {
+    console.log('No step meta found for route:', to.path);
   }
   
   next();

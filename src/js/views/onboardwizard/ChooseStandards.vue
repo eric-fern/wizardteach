@@ -128,38 +128,46 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useStore } from '../../stores/store'
 import BaseWizardStep from './BaseWizardStep.vue'
 import UploadAndHoldFileWithinPinia from '../../components/shared/UploadAndHoldFileWithinPinia.vue'
-import { useRouter } from 'vue-router'
 import { useTheme } from '../../composables/useTheme'
-import { useWizardContext } from '../../composables/useWizardContext'
+import { goToNextStep, goToPreviousStep } from '../../router/wizardNavigation'
 
 const store = useStore()
 const { getColor, getCommonStyles } = useTheme()
-const { useWizardNavigation, useWizardValidation } = useWizardContext()
-const { goToNext } = useWizardNavigation()
-const { isCurrentStepValid } = useWizardValidation()
 
 const selectedType = ref(store.formData.standards.selectedType)
 const selectedState = ref(store.formData.standards.state)
-const router = useRouter()
 const emit = defineEmits(['next', 'prev'])
 
 // Initialize from store on mount
 onMounted(() => {
+  console.log('ChooseStandards mounted');
   selectedType.value = store.formData.standards.selectedType
   selectedState.value = store.formData.standards.state
 })
 
 const states = store.standardsConfig.states
 
-// Use the validation from context
-const isValid = computed(() => isCurrentStepValid.value)
+// Compute validity based on selection
+const isValid = computed(() => {
+  if (selectedType.value === 'state') {
+    return !!selectedState.value;
+  }
+  if (selectedType.value === 'custom') {
+    return !!store.formData.standards.customStandards.file;
+  }
+  return !!selectedType.value;
+});
 
-const handleNext = () => {
+const handleNext = async () => {
   if (selectedType.value === 'custom') {
     store.setPdfType('standards')
   }
-  goToNext()
-}
+  await goToNextStep();
+};
+
+const handlePrev = async () => {
+  await goToPreviousStep();
+};
 
 // Watch for state selection
 watch(selectedState, (newState) => {

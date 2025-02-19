@@ -1,5 +1,7 @@
-import { provide, inject, ref } from 'vue'
+import { inject, provide } from 'vue'
+import { goToNextStep, goToPreviousStep } from '../router/wizardNavigation'
 import { useStore } from '../stores/store'
+import { computed } from 'vue'
 
 // Symbols for injection keys
 export const WizardKeys = {
@@ -7,6 +9,8 @@ export const WizardKeys = {
   VALIDATION: Symbol('wizard-validation'),
   THEME: Symbol('wizard-theme')
 }
+
+const WIZARD_CONTEXT_KEY = Symbol('wizard-context')
 
 /**
  * Wizard Context Provider
@@ -26,65 +30,45 @@ export const WizardKeys = {
  * const { navigation, validation, theme } = useWizardContext()
  * ```
  */
-export function useWizardContext() {
+export function provideWizardContext() {
   const store = useStore()
 
-  // Provider function
-  function provideWizardContext() {
-    // Navigation context
-    provide(WizardKeys.NAVIGATION, {
-      currentStep: ref(store.currentStep),
-      steps: store.steps,
-      goToNext: () => store.nextStep(),
-      goToPrev: () => store.prevStep(),
-      goToStep: (step) => store.setCurrentStep(step)
-    })
-
-    // Validation context
-    provide(WizardKeys.VALIDATION, {
-      isCurrentStepValid: ref(store.currentStepValidation.isValid),
-      requiredFields: ref(store.currentStepValidation.requiredFields),
-      validateStep: () => store.validateCurrentStep()
-    })
-
-    // Theme context
-    provide(WizardKeys.THEME, {
-      isDark: ref(false), // Add dark mode toggle if needed
-      updateTheme: (theme) => {
-        // Theme update logic
-      }
-    })
-  }
-
-  // Consumer functions
-  function useWizardNavigation() {
-    const navigation = inject(WizardKeys.NAVIGATION)
-    if (!navigation) {
-      throw new Error('Wizard navigation context not found. Are you using this inside a wizard component?')
+  const context = {
+    navigation: {
+      goToNext: goToNextStep,
+      goToPrev: goToPreviousStep
+    },
+    validation: {
+      isCurrentStepValid: computed(() => store.currentStepValidation.isValid)
     }
-    return navigation
   }
 
-  function useWizardValidation() {
-    const validation = inject(WizardKeys.VALIDATION)
-    if (!validation) {
-      throw new Error('Wizard validation context not found. Are you using this inside a wizard component?')
-    }
-    return validation
-  }
+  provide(WIZARD_CONTEXT_KEY, context)
+  return context
+}
 
-  function useWizardTheme() {
-    const theme = inject(WizardKeys.THEME)
-    if (!theme) {
-      throw new Error('Wizard theme context not found. Are you using this inside a wizard component?')
-    }
-    return theme
+export function useWizardContext() {
+  const context = inject(WIZARD_CONTEXT_KEY)
+  if (!context) {
+    throw new Error('Wizard navigation context not found. Are you using this inside a wizard component?')
   }
+  return context
+}
 
-  return {
-    provideWizardContext,
-    useWizardNavigation,
-    useWizardValidation,
-    useWizardTheme
+export function useWizardNavigation() {
+  const context = useWizardContext()
+  return context.navigation
+}
+
+export function useWizardValidation() {
+  const context = useWizardContext()
+  return context.validation
+}
+
+function useWizardTheme() {
+  const theme = inject(WizardKeys.THEME)
+  if (!theme) {
+    throw new Error('Wizard theme context not found. Are you using this inside a wizard component?')
   }
+  return theme
 } 

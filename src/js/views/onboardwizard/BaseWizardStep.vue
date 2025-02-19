@@ -112,12 +112,10 @@
 
 <script setup>
 import { useStore } from '../../stores/store';
-import { useRouter } from 'vue-router';
 import BlueDottedOvalShowsCompletedFormFields from '../../components/shared/BlueDottedOvalShowsCompletedFormFields.vue';
+import { goToNextStep, goToPreviousStep } from '../../router/wizardNavigation';
 
 const store = useStore();
-const router = useRouter();
-// Allow parent components to handle navigation events if needed
 const emit = defineEmits(['next', 'prev']);
 
 // Component props with defaults
@@ -147,69 +145,21 @@ const props = defineProps({
 /**
  * Handles navigation to the next step
  * 1. Emits 'next' event for parent components
- * 2. Routes to the appropriate next step based on current step
+ * 2. Uses centralized navigation utility
  */
-const handleNext = () => {
-  // First emit the event to allow parent components to handle any specific logic
+const handleNext = async () => {
   emit('next');
-  
-  // Then handle the navigation based on current step
-  if (store.currentStep < store.steps.length - 1) {
-    const nextStep = store.currentStep + 1;
-    switch(nextStep) {
-      case 1:
-        router.push('/onboard/course-details');  // From Entry to Course Details
-        break;
-      case 2:
-        router.push('/onboard/standards');       // From Course Details to Standards
-        break;
-      case 3:
-        router.push('/onboard/thinking');        // From Standards to Thinking
-        break;
-      case 4:
-        router.push('/onboard/questions');       // From Thinking to Questions
-        break;
-      case 5:
-        router.push('/create');                  // From Questions to Review
-        break;
-    }
-  }
+  await goToNextStep();
 };
 
 /**
  * Handles navigation to the previous step
- * 1. Emits 'prev' event for parent components to handle cleanup
- * 2. Routes to the appropriate previous step based on current step
- * 3. Updates store.currentStep through router navigation guard
- * 
- * Navigation Path:
- * Create -> Questions -> Standards -> Course Details -> Entry
+ * 1. Emits 'prev' event for parent components
+ * 2. Uses centralized navigation utility
  */
-const handlePrev = () => {
-  // First emit the event to allow parent components to handle any specific logic
+const handlePrev = async () => {
   emit('prev');
-  
-  // Then handle the navigation based on current step
-  if (store.currentStep > 0) {
-    const prevStep = store.currentStep - 1;
-    switch(prevStep) {
-      case 0:
-        router.push('/');                        // Back to Entry
-        break;
-      case 1:
-        router.push('/onboard/course-details');  // Back to Course Details
-        break;
-      case 2:
-        router.push('/onboard/standards');       // Back to Standards
-        break;
-      case 3:
-        router.push('/onboard/thinking');        // Back to Thinking
-        break;
-      case 4:
-        router.push('/onboard/questions');       // Back to Questions
-        break;
-    }
-  }
+  await goToPreviousStep();
 };
 
 const formatDate = (dateString) => {
