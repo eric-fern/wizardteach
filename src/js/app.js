@@ -1,10 +1,13 @@
 import { createApp } from 'vue';
 import ElementPlus from 'element-plus';
-import 'element-plus/dist/index.css';
 import { createPinia } from 'pinia';
 import App from './App.vue';
 import router from './router';
+
+// Import styles in correct order
+import 'element-plus/dist/index.css';
 import '../css/main.css';
+import '../css/form-controls.css';  // Load form controls last
 
 /* Import Font Awesome core */
 import { library } from '@fortawesome/fontawesome-svg-core';

@@ -20,13 +20,7 @@
             v-model="subject"
             type="text"
             placeholder="e.g., Mathematics, History, Science"
-            class="w-full p-3 rounded-lg transition-colors duration-200"
-            :style="{
-              backgroundColor: 'var(--bg-secondary)',
-              color: 'var(--text-primary)',
-              borderColor: 'var(--border-color)',
-              border: '1px solid var(--border-color)'
-            }"
+            class="form-input w-full"
             @keyup.enter="startWizard"
           />
         </div>

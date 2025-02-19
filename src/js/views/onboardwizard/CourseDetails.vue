@@ -31,8 +31,9 @@
             :value="store.formData.studentAgeRange"
             @change="store.updateFormData('studentAgeRange', $event.target.value)"
             class="form-select w-full"
+            style="color: var(--text-primary)"
           >
-            <option value="">Select an age range</option>
+            <option value="" style="color: var(--text-secondary)">Select an age range</option>
             <option v-for="option in store.ageOptions" 
                     :key="option.value" 
                     :value="option.value">
@@ -60,8 +61,9 @@
             @input="store.updateFormData('numberOfStudents', $event.target.value)"
             min="1"
             max="100"
-            class="form-input w-full"
+            class="form-input w-full number-students"
             placeholder="Enter class size"
+            style="color: #E4E6EB"
           >
         </div>
       </div>
@@ -158,8 +160,9 @@
               :value="store.formData.lessonDuration"
               @change="store.updateFormData('lessonDuration', $event.target.value)"
               class="form-select w-full"
+              style="color: var(--text-primary)"
             >
-              <option value="">Select duration</option>
+              <option value="" style="color: var(--text-secondary)">Select duration</option>
               <option v-for="(label, value) in store.durations" 
                       :key="value" 
                       :value="value">
@@ -187,6 +190,7 @@
                 :value="store.formData.startDate"
                 @change="store.updateFormData('startDate', $event.target.value)"
                 class="form-input w-full"
+                style="color: var(--text-primary)"
               >
             </div>
             <div>
@@ -206,6 +210,7 @@
                 :value="store.formData.endDate"
                 @change="store.updateFormData('endDate', $event.target.value)"
                 class="form-input w-full"
+                style="color: var(--text-primary)"
               >
             </div>
           </div>
@@ -322,15 +327,70 @@ select option:hover {
   transition-duration: 200ms;
 }
 
-/* Input focus styles */
-input:focus, select:focus, textarea:focus {
-  outline: none;
-  border-color: var(--primary-500) !important;
-  box-shadow: 0 0 0 1px var(--primary-500);
+/* Card styling */
+.wizard-card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
 }
 
-/* Input hover styles */
-input:hover, select:hover, textarea:hover {
-  border-color: var(--primary-500);
+/* Wizard specific text styles */
+.wizard-text {
+  color: var(--text-primary);
+}
+
+.wizard-text-secondary {
+  color: var(--text-secondary);
+}
+
+.wizard-label {
+  color: var(--text-primary);
+}
+
+/* Super specific selector for number input placeholder */
+.wizard-section input[type="number"].form-input.number-students::placeholder {
+  color: #E4E6EB !important;
+  opacity: 1 !important;
+}
+
+/* Webkit specific */
+.wizard-section input[type="number"].form-input.number-students::-webkit-input-placeholder {
+  color: #E4E6EB !important;
+  opacity: 1 !important;
+}
+
+/* Firefox specific */
+.wizard-section input[type="number"].form-input.number-students::-moz-placeholder {
+  color: #E4E6EB !important;
+  opacity: 1 !important;
+}
+
+/* Internet Explorer specific */
+.wizard-section input[type="number"].form-input.number-students:-ms-input-placeholder {
+  color: #E4E6EB !important;
+  opacity: 1 !important;
+}
+
+/* Remove previous less specific rules */
+input[type="number"].form-input::placeholder {
+  color: #E4E6EB !important;
+  opacity: 1 !important;
+}
+
+/* Keep other form control styles */
+.form-input::placeholder {
+  color: var(--text-secondary) !important;
+  opacity: 0.7;
+}
+
+.form-select option[value=""] {
+  color: var(--text-secondary) !important;
+  opacity: 0.7;
+}
+
+/* Tooltip */
+.wizard-tooltip {
+  @apply invisible group-hover:visible absolute bottom-full left-0 mb-2 w-80 p-2 rounded shadow-lg z-10;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
 }
 </style> 

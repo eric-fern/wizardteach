@@ -1,0 +1,142 @@
+/* Form Control Base Styles */
+.wizard-section input.form-input,
+.wizard-section select.form-select,
+.wizard-section textarea.form-textarea,
+input.form-input,
+select.form-select,
+textarea.form-textarea {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  width: 100%;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+/* Placeholder Styles - Light Mode */
+:root:not(.dark) .wizard-section input.form-input::placeholder,
+:root:not(.dark) .wizard-section select.form-select::placeholder,
+:root:not(.dark) .wizard-section textarea.form-textarea::placeholder,
+:root:not(.dark) input.form-input::placeholder,
+:root:not(.dark) select.form-select::placeholder,
+:root:not(.dark) textarea.form-textarea::placeholder {
+  color: #4b5563 !important; /* matches --text-secondary in light mode */
+  opacity: 0.7;
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+/* Placeholder Styles - Dark Mode */
+.dark .wizard-section input.form-input::placeholder,
+.dark .wizard-section select.form-select::placeholder,
+.dark .wizard-section textarea.form-textarea::placeholder,
+.dark input.form-input::placeholder,
+.dark select.form-select::placeholder,
+.dark textarea.form-textarea::placeholder {
+  color: #B0B3B8 !important; /* matches --text-secondary in dark mode */
+  opacity: 0.7;
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+
+/* Select placeholder option - Light Mode */
+:root:not(.dark) .wizard-section select.form-select option[value=""],
+:root:not(.dark) select.form-select option[value=""] {
+  color: #4b5563 !important;
+  opacity: 0.7;
+}
+
+/* Select placeholder option - Dark Mode */
+.dark .wizard-section select.form-select option[value=""],
+.dark select.form-select option[value=""] {
+  color: #B0B3B8 !important;
+  opacity: 0.7;
+}
+
+/* Remove number input spinners */
+input[type="number"].form-input::-webkit-outer-spin-button,
+input[type="number"].form-input::-webkit-inner-spin-button,
+.wizard-section input[type="number"].form-input::-webkit-outer-spin-button,
+.wizard-section input[type="number"].form-input::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0;
+}
+
+input[type="number"].form-input,
+.wizard-section input[type="number"].form-input {
+  -moz-appearance: textfield !important;
+  appearance: textfield !important;
+}
+
+/* Select Element Styling */
+select.form-select,
+.wizard-section select.form-select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 0.75rem center !important;
+  background-size: 1em !important;
+  padding-right: 2.5rem !important;
+}
+
+/* Select Options Styling */
+select.form-select option,
+.wizard-section select.form-select option {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 0.5rem;
+}
+
+select.form-select option:checked,
+.wizard-section select.form-select option:checked {
+  background-color: var(--primary-500);
+  color: white;
+}
+
+/* Focus States */
+.wizard-section input.form-input:focus,
+.wizard-section select.form-select:focus,
+.wizard-section textarea.form-textarea:focus,
+input.form-input:focus,
+select.form-select:focus,
+textarea.form-textarea:focus,
+textarea.form-textarea:focus {
+  outline: none;
+  border-color: var(--primary-500) !important;
+  box-shadow: 0 0 0 1px var(--primary-500);
+}
+
+/* Hover States */
+.wizard-section input.form-input:hover:not(:disabled),
+.wizard-section select.form-select:hover:not(:disabled),
+.wizard-section textarea.form-textarea:hover:not(:disabled),
+input.form-input:hover:not(:disabled),
+select.form-select:hover:not(:disabled),
+textarea.form-textarea:hover:not(:disabled),
+textarea.form-textarea:hover:not(:disabled) {
+  border-color: var(--primary-500);
+}
+
+/* Disabled States */
+.wizard-section input.form-input:disabled,
+.wizard-section select.form-select:disabled,
+.wizard-section textarea.form-textarea:disabled,
+input.form-input:disabled,
+select.form-select:disabled,
+textarea.form-textarea:disabled,
+textarea.form-textarea:disabled {
+  background-color: var(--bg-primary);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+}
+
+/* Textarea specific styles */
+textarea.form-textarea {
+  resize: none;
+  min-height: 100px;
+}
